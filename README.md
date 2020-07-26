@@ -1,4 +1,4 @@
 # Unofficial Pixiv API doc
 
-![.github/workflows/ci.yml](https://github.com/hanshsieh/pixiv-api-doc/workflows/.github/workflows/ci.yml/badge.svg)  
+[![CI](https://github.com/hanshsieh/pixiv-api-doc/workflows/CI/badge.svg?event=push)](https://github.com/hanshsieh/pixiv-api-doc/actions?query=workflow%3ACI)
 [Document](https://hanshsieh.github.io/pixiv-api-doc/)  
