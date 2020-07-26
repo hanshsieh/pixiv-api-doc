@@ -21,9 +21,12 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
-    # Install node
-    - uses: actions/setup-node@v2-beta
+    - name: Install node
+      uses: actions/setup-node@v2-beta
       with:
         node-version: '12'
     
@@ -31,7 +34,20 @@ jobs:
       run: |
         sudo npm install @openapitools/openapi-generator-cli -g
 
-    # Runs a single command using the runners shell
     - name: Convert API spec to HTML
       run: |
-        openapi-generator generate -g html2 -i ./api.yaml -o output
+        DOC_OUTPUT=$(mktemp -d)
+        openapi-generator generate -g html2 -i ./api.yaml -o "${DOC_OUTPUT}"
+
+    - name: Update gh-pages branch
+      run: |
+        git checkout gh-pages
+        rm -rf ./*
+        mv "${DOC_OUTPUT}/*" ./
+        git commit -m "Update doc"
+
+    - name: Push doc to git page
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.HEADLESS_TOKEN }}
+        branch: gh-pages
