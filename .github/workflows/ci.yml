@@ -2,8 +2,6 @@
 
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches: [ master ]
@@ -36,19 +34,25 @@ jobs:
 
     - name: Convert API spec to HTML
       run: |
-        DOC_OUTPUT=$(mktemp -d)
-        echo "::set-env name=DOC_OUTPUT::${DOC_OUTPUT}"
-        openapi-generator generate -g html2 -i ./api.yaml -o "${DOC_OUTPUT}"
+        openapi-generator generate -g html2 -i ./api.yaml -o "/tmp/output"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
 
+  update-doc:
+    needs: [build]
+    steps:
+    - name: Triggering event
+      run: echo "${GITHUB_EVENT_NAME}"
     - name: Update gh-pages branch
       run: |
         git checkout gh-pages
         rm -rf ./*
-        mv "${DOC_OUTPUT}/*" ./
-        git commit -m "Update doc"
+        mv /tmp/output/* ./
+        git add .
+        git commit -m "Update doc" || true
 
     - name: Push doc to git page
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.HEADLESS_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: gh-pages
