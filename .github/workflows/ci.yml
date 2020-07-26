@@ -37,6 +37,7 @@ jobs:
     - name: Convert API spec to HTML
       run: |
         DOC_OUTPUT=$(mktemp -d)
+        echo "::set-env name=DOC_OUTPUT::${DOC_OUTPUT}"
         openapi-generator generate -g html2 -i ./api.yaml -o "${DOC_OUTPUT}"
 
     - name: Update gh-pages branch
