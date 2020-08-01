@@ -841,41 +841,66 @@ ul.nav-tabs {
   <script>
     // Script section to load models into a JS Var
     var defs = {}
-    defs["AuthResult"] = {
+    defs["APIError"] = {
   "type" : "object",
   "properties" : {
-    "response" : {
-      "$ref" : "#/components/schemas/AuthToken"
+    "error" : {
+      "$ref" : "#/components/schemas/APIErrorDetails"
     }
   }
 };
-    defs["AuthToken"] = {
+    defs["APIErrorDetails"] = {
   "type" : "object",
   "properties" : {
-    "access_token" : {
-      "type" : "string",
-      "description" : "The issued access token that can be used to access other APIs.\n"
+    "user_message" : {
+      "type" : "string"
     },
-    "expires_in" : {
+    "message" : {
+      "type" : "string"
+    },
+    "reason" : {
+      "type" : "string"
+    },
+    "user_message_details" : {
+      "type" : "object",
+      "description" : "Details of the error. The schema depends on the error type.\n"
+    }
+  }
+};
+    defs["AuthError"] = {
+  "type" : "object",
+  "properties" : {
+    "has_error" : {
+      "type" : "boolean",
+      "example" : true
+    },
+    "errors" : {
+      "$ref" : "#/components/schemas/AuthErrorDetails"
+    },
+    "error" : {
+      "type" : "string",
+      "example" : "invalid_grant"
+    }
+  }
+};
+    defs["AuthErrorDetails"] = {
+  "type" : "object",
+  "properties" : {
+    "system" : {
+      "$ref" : "#/components/schemas/AuthErrorDetails_system"
+    }
+  },
+  "description" : "Details of the error. The keys will be the category of the error."
+};
+    defs["AuthErrorDetails_system"] = {
+  "properties" : {
+    "message" : {
+      "type" : "string",
+      "example" : "Invalid grant_type parameter or parameter missing"
+    },
+    "code" : {
       "type" : "integer",
-      "description" : "The number of seconds from now that the access token will expire.\n"
-    },
-    "token_type" : {
-      "type" : "string",
-      "example" : "bearer"
-    },
-    "scope" : {
-      "type" : "string"
-    },
-    "refresh_token" : {
-      "type" : "string",
-      "description" : "The token that can be used to get a refreshed access token within expiry time without doing the authentication again."
-    },
-    "user" : {
-      "$ref" : "#/components/schemas/User"
-    },
-    "device_token" : {
-      "type" : "string"
+      "example" : 1508
     }
   }
 };
@@ -918,43 +943,56 @@ ul.nav-tabs {
     }
   }
 };
-    defs["Error"] = {
+    defs["AuthTokens"] = {
   "type" : "object",
   "properties" : {
-    "has_error" : {
-      "type" : "boolean",
-      "example" : true
-    },
-    "errors" : {
-      "$ref" : "#/components/schemas/Error_errors"
-    }
-  }
-};
-    defs["Error_errors"] = {
-  "properties" : {
-    "system" : {
-      "$ref" : "#/components/schemas/Error_errors_system"
-    }
-  },
-  "description" : "Details of the error. The keys will be the category of the error.\n"
-};
-    defs["Error_errors_system"] = {
-  "properties" : {
-    "message" : {
+    "access_token" : {
       "type" : "string",
-      "example" : "Invalid grant_type parameter or parameter missing"
+      "description" : "The issued access token that can be used to access other APIs.\n"
     },
-    "code" : {
+    "expires_in" : {
       "type" : "integer",
-      "example" : 1508
+      "description" : "The number of seconds from now that the access token will expire.\n"
+    },
+    "token_type" : {
+      "type" : "string",
+      "example" : "bearer"
+    },
+    "scope" : {
+      "type" : "string"
+    },
+    "refresh_token" : {
+      "type" : "string",
+      "description" : "The token that can be used to get a refreshed access token within expiry time without doing\nthe authentication again.\n"
+    },
+    "user" : {
+      "$ref" : "#/components/schemas/FullUser"
+    },
+    "device_token" : {
+      "type" : "string"
     }
   }
 };
-    defs["User"] = {
+    defs["AuthTokensResp"] = {
+  "description" : "The schema inside `response` has the same schema as the top-level fields of this object. It's possibly \nto provide backward compatibality.  \n",
+  "allOf" : [ {
+    "$ref" : "#/components/schemas/AuthTokens"
+  }, {
+    "$ref" : "#/components/schemas/AuthTokensResp_allOf"
+  } ]
+};
+    defs["AuthTokensResp_allOf"] = {
+  "properties" : {
+    "response" : {
+      "$ref" : "#/components/schemas/AuthTokens"
+    }
+  }
+};
+    defs["FullUser"] = {
   "type" : "object",
   "properties" : {
     "profile_image_urls" : {
-      "$ref" : "#/components/schemas/User_profile_image_urls"
+      "$ref" : "#/components/schemas/FullUser_profile_image_urls"
     },
     "id" : {
       "type" : "string",
@@ -987,7 +1025,7 @@ ul.nav-tabs {
     }
   }
 };
-    defs["User_profile_image_urls"] = {
+    defs["FullUser_profile_image_urls"] = {
   "properties" : {
     "px_16x16" : {
       "type" : "string",
@@ -1006,6 +1044,231 @@ ul.nav-tabs {
     }
   },
   "description" : "User's profile image URLs.  \nIf the user doesn't set a profile image, URLs to a default image will be used.\n"
+};
+    defs["IllustImageURLs"] = {
+  "type" : "object",
+  "properties" : {
+    "square_medium" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/c/360x360_70/img-master/img/2020/07/30/00/26/33/83314745_p0_square1200.jpg"
+    },
+    "medium" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/c/540x540_70/img-master/img/2020/07/30/00/26/33/83314745_p0_master1200.jpg"
+    },
+    "large" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/c/600x1200_90/img-master/img/2020/07/30/00/26/33/83314745_p0_master1200.jpg"
+    }
+  }
+};
+    defs["Illustration"] = {
+  "type" : "object",
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64",
+      "example" : 83314745
+    },
+    "title" : {
+      "type" : "string",
+      "example" : "アリス・シンセシス・サーティ/cap"
+    },
+    "type" : {
+      "type" : "string",
+      "enum" : [ "illust", "ugoira", "manga" ]
+    },
+    "image_urls" : {
+      "$ref" : "#/components/schemas/IllustImageURLs"
+    },
+    "caption" : {
+      "type" : "string",
+      "example" : "何気に商人だけのサムネって初めてでは？"
+    },
+    "restrict" : {
+      "type" : "integer"
+    },
+    "user" : {
+      "$ref" : "#/components/schemas/User"
+    },
+    "tags" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Tag"
+      }
+    },
+    "tools" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string",
+        "description" : "The tools used for creating the illustration.",
+        "example" : "CLIP STUDIO PAINT"
+      }
+    },
+    "create_date" : {
+      "type" : "string",
+      "format" : "date-time"
+    },
+    "page_count" : {
+      "type" : "integer",
+      "description" : "Total number of pages for the illustration."
+    },
+    "width" : {
+      "type" : "integer",
+      "example" : 1240
+    },
+    "height" : {
+      "type" : "integer",
+      "example" : 2089
+    },
+    "sanity_level" : {
+      "type" : "integer"
+    },
+    "x_restrict" : {
+      "type" : "integer"
+    },
+    "series" : {
+      "$ref" : "#/components/schemas/Series"
+    },
+    "meta_single_page" : {
+      "$ref" : "#/components/schemas/MetaSinglePage"
+    },
+    "meta_pages" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/MetaPage"
+      }
+    },
+    "total_view" : {
+      "type" : "integer"
+    },
+    "total_bookmarks" : {
+      "type" : "integer"
+    },
+    "is_bookmarked" : {
+      "type" : "boolean"
+    },
+    "visible" : {
+      "type" : "boolean"
+    },
+    "is_muted" : {
+      "type" : "boolean"
+    }
+  }
+};
+    defs["MetaPage"] = {
+  "type" : "object",
+  "properties" : {
+    "image_urls" : {
+      "$ref" : "#/components/schemas/MetaPageImageURLs"
+    }
+  },
+  "description" : "It contains the information of one of the multiple pages of an illustration.\n"
+};
+    defs["MetaPageImageURLs"] = {
+  "type" : "object",
+  "properties" : {
+    "square_medium" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/c/360x360_70/img-master/img/2020/07/31/19/34/58/83348083_p0_square1200.jpg"
+    },
+    "medium" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/c/540x540_70/img-master/img/2020/07/31/19/34/58/83348083_p0_master1200.jpg"
+    },
+    "large" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/c/600x1200_90/img-master/img/2020/07/31/19/34/58/83348083_p0_master1200.jpg"
+    },
+    "original" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/img-original/img/2020/07/31/19/34/58/83348083_p0.jpg"
+    }
+  },
+  "description" : "contains the image URLs of a meta page."
+};
+    defs["MetaSinglePage"] = {
+  "type" : "object",
+  "properties" : {
+    "original_image_url" : {
+      "type" : "string",
+      "description" : "The URL to the original size of the illustration.",
+      "example" : "https://i.pximg.net/img-original/img/2020/07/30/00/26/33/83314745_p0.png"
+    }
+  },
+  "description" : "It contains the image URLs when the illustration contain only a single image.  \n"
+};
+    defs["RankingIllustrations"] = {
+  "required" : [ "illusts" ],
+  "type" : "object",
+  "properties" : {
+    "illusts" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Illustration"
+      }
+    },
+    "next_url" : {
+      "type" : "string",
+      "description" : "The next URL that can be used for querying the next page, if any.\n",
+      "example" : "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
+    }
+  }
+};
+    defs["Series"] = {
+  "type" : "object",
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "title" : {
+      "type" : "string"
+    }
+  }
+};
+    defs["Tag"] = {
+  "required" : [ "name" ],
+  "type" : "object",
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "example" : "Fate/GrandOrder"
+    },
+    "translated_name" : {
+      "type" : "string"
+    }
+  }
+};
+    defs["User"] = {
+  "type" : "object",
+  "properties" : {
+    "id" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "profile_image_urls" : {
+      "$ref" : "#/components/schemas/User_profile_image_urls"
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "account" : {
+      "type" : "string",
+      "description" : "Account name."
+    },
+    "is_followed" : {
+      "type" : "boolean"
+    }
+  }
+};
+    defs["User_profile_image_urls"] = {
+  "properties" : {
+    "medium" : {
+      "type" : "string",
+      "example" : "https://i.pximg.net/user-profile/img/2020/02/03/16/33/15/17853306_774cadacc6003ba8aa04ea1b754e8755_170.jpg"
+    }
+  }
 };
 
     var errs = {};
@@ -1028,6 +1291,10 @@ ul.nav-tabs {
                   <li class="nav-header" data-group="Auth"><a href="#api-Auth">API Methods - Auth</a></li>
                     <li data-group="Auth" data-name="getAuthToken" class="">
                       <a href="#api-Auth-getAuthToken">getAuthToken</a>
+                    </li>
+                  <li class="nav-header" data-group="Illustration"><a href="#api-Illustration">API Methods - Illustration</a></li>
+                    <li data-group="Illustration" data-name="getIllustsRanking" class="">
+                      <a href="#api-Illustration-getIllustsRanking">getIllustsRanking</a>
                     </li>
           </ul>
         </nav>
@@ -1096,7 +1363,7 @@ There&#39;re a few grant types to do the authentication:
 
                         <div class="tab-content">
                           <div class="tab-pane active" id="examples-Auth-getAuthToken-0-curl">
-                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/auth/token"</code></pre>
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "https://app-api.pixiv.net/v1/auth/token"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Auth-getAuthToken-0-java">
                             <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
@@ -1112,6 +1379,12 @@ public class AuthApiExample {
     public static void main(String[] args) {
         
         AuthApi apiInstance = new AuthApi();
+        String userAgent = PixivAndroidApp/5.0.64 (Android 6.0); // String | 
+        Date xClientTime = 2020-08-01T23:13:00Z; // Date | Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+
+        String xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; // String | The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+
         String clientId = clientId_example; // String | ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
 
@@ -1130,7 +1403,7 @@ to act as the mobile app.
 token.
 
         try {
-            AuthResult result = apiInstance.getAuthToken(clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken);
+            AuthTokensResp result = apiInstance.getAuthToken(userAgent, xClientTime, xClientHash, clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling AuthApi#getAuthToken");
@@ -1148,6 +1421,12 @@ public class AuthApiExample {
 
     public static void main(String[] args) {
         AuthApi apiInstance = new AuthApi();
+        String userAgent = PixivAndroidApp/5.0.64 (Android 6.0); // String | 
+        Date xClientTime = 2020-08-01T23:13:00Z; // Date | Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+
+        String xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; // String | The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+
         String clientId = clientId_example; // String | ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
 
@@ -1166,7 +1445,7 @@ to act as the mobile app.
 token.
 
         try {
-            AuthResult result = apiInstance.getAuthToken(clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken);
+            AuthTokensResp result = apiInstance.getAuthToken(userAgent, xClientTime, xClientHash, clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling AuthApi#getAuthToken");
@@ -1180,7 +1459,13 @@ token.
   <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
   </div> -->
                             <div class="tab-pane" id="examples-Auth-getAuthToken-0-objc">
-                              <pre class="prettyprint"><code class="language-cpp">String *clientId = clientId_example; // ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
+                              <pre class="prettyprint"><code class="language-cpp">String *userAgent = PixivAndroidApp/5.0.64 (Android 6.0); //  (default to null)
+Date *xClientTime = 2020-08-01T23:13:00Z; // Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+ (default to null)
+String *xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; // The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+ (default to null)
+String *clientId = clientId_example; // ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
  (default to null)
 String *clientSecret = clientSecret_example; // Client secret for OAuth authentication. Use `lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj`
@@ -1201,14 +1486,17 @@ token.
 AuthApi *apiInstance = [[AuthApi alloc] init];
 
 // Create a new authentication token
-[apiInstance getAuthTokenWith:clientId
+[apiInstance getAuthTokenWith:userAgent
+    xClientTime:xClientTime
+    xClientHash:xClientHash
+    clientId:clientId
     clientSecret:clientSecret
     grantType:grantType
     getSecureUrl:getSecureUrl
     username:username
     password:password
     refreshToken:refreshToken
-              completionHandler: ^(AuthResult output, NSError* error) {
+              completionHandler: ^(AuthTokensResp output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
                             }
@@ -1223,6 +1511,12 @@ AuthApi *apiInstance = [[AuthApi alloc] init];
                               <pre class="prettyprint"><code class="language-js">var PixivApi = require('pixiv_api');
 
 var api = new PixivApi.AuthApi()
+var userAgent = PixivAndroidApp/5.0.64 (Android 6.0); // {String} 
+var xClientTime = 2020-08-01T23:13:00Z; // {Date} Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+
+var xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; // {String} The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+
 var clientId = clientId_example; // {String} ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
 
@@ -1250,7 +1544,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.getAuthToken(clientId, clientSecret, grantType, opts, callback);
+api.getAuthToken(userAgent, xClientTime, xClientHash, clientId, clientSecret, grantType, opts, callback);
 </code></pre>
                             </div>
 
@@ -1272,6 +1566,12 @@ namespace Example
         {
             
             var apiInstance = new AuthApi();
+            var userAgent = PixivAndroidApp/5.0.64 (Android 6.0);  // String |  (default to null)
+            var xClientTime = 2020-08-01T23:13:00Z;  // Date | Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+ (default to null)
+            var xClientHash = 3aa8bb04754d6b260572822d2b8d9adf;  // String | The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+ (default to null)
             var clientId = clientId_example;  // String | ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
  (default to null)
@@ -1293,7 +1593,7 @@ token.
             try
             {
                 // Create a new authentication token
-                AuthResult result = apiInstance.getAuthToken(clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken);
+                AuthTokensResp result = apiInstance.getAuthToken(userAgent, xClientTime, xClientHash, clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken);
                 Debug.WriteLine(result);
             }
             catch (Exception e)
@@ -1311,6 +1611,12 @@ token.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new OpenAPITools\Client\Api\AuthApi();
+$userAgent = PixivAndroidApp/5.0.64 (Android 6.0); // String | 
+$xClientTime = 2020-08-01T23:13:00Z; // Date | Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+
+$xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; // String | The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+
 $clientId = clientId_example; // String | ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
 
@@ -1330,7 +1636,7 @@ token.
 
 
 try {
-    $result = $api_instance->getAuthToken($clientId, $clientSecret, $grantType, $getSecureUrl, $username, $password, $refreshToken);
+    $result = $api_instance->getAuthToken($userAgent, $xClientTime, $xClientHash, $clientId, $clientSecret, $grantType, $getSecureUrl, $username, $password, $refreshToken);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling AuthApi->getAuthToken: ', $e->getMessage(), PHP_EOL;
@@ -1344,6 +1650,12 @@ use WWW::OPenAPIClient::Configuration;
 use WWW::OPenAPIClient::AuthApi;
 
 my $api_instance = WWW::OPenAPIClient::AuthApi->new();
+my $userAgent = PixivAndroidApp/5.0.64 (Android 6.0); # String | 
+my $xClientTime = 2020-08-01T23:13:00Z; # Date | Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+
+my $xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; # String | The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+
 my $clientId = clientId_example; # String | ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
 
@@ -1363,7 +1675,7 @@ token.
 
 
 eval { 
-    my $result = $api_instance->getAuthToken(clientId => $clientId, clientSecret => $clientSecret, grantType => $grantType, getSecureUrl => $getSecureUrl, username => $username, password => $password, refreshToken => $refreshToken);
+    my $result = $api_instance->getAuthToken(userAgent => $userAgent, xClientTime => $xClientTime, xClientHash => $xClientHash, clientId => $clientId, clientSecret => $clientSecret, grantType => $grantType, getSecureUrl => $getSecureUrl, username => $username, password => $password, refreshToken => $refreshToken);
     print Dumper($result);
 };
 if ($@) {
@@ -1380,6 +1692,12 @@ from pprint import pprint
 
 # create an instance of the API class
 api_instance = openapi_client.AuthApi()
+userAgent = PixivAndroidApp/5.0.64 (Android 6.0) # String |  (default to null)
+xClientTime = 2020-08-01T23:13:00Z # Date | Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+ (default to null)
+xClientHash = 3aa8bb04754d6b260572822d2b8d9adf # String | The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+ (default to null)
 clientId = clientId_example # String | ID of the client for OAuth authentication. Use `MOBrBDS8blbauoSck0ZfDbtuzpyT`
 to act as the mobile app.
  (default to null)
@@ -1400,7 +1718,7 @@ token.
 
 try: 
     # Create a new authentication token
-    api_response = api_instance.get_auth_token(clientId, clientSecret, grantType, getSecureUrl=getSecureUrl, username=username, password=password, refreshToken=refreshToken)
+    api_response = api_instance.get_auth_token(userAgent, xClientTime, xClientHash, clientId, clientSecret, grantType, getSecureUrl=getSecureUrl, username=username, password=password, refreshToken=refreshToken)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling AuthApi->getAuthToken: %s\n" % e)</code></pre>
@@ -1410,6 +1728,9 @@ except ApiException as e:
                               <pre class="prettyprint"><code class="language-rust">extern crate AuthApi;
 
 pub fn main() {
+    let userAgent = PixivAndroidApp/5.0.64 (Android 6.0); // String
+    let xClientTime = 2020-08-01T23:13:00Z; // Date
+    let xClientHash = 3aa8bb04754d6b260572822d2b8d9adf; // String
     let clientId = clientId_example; // String
     let clientSecret = clientSecret_example; // String
     let grantType = grantType_example; // String
@@ -1419,7 +1740,7 @@ pub fn main() {
     let refreshToken = refreshToken_example; // String
 
     let mut context = AuthApi::Context::default();
-    let result = client.getAuthToken(clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken, &context).wait();
+    let result = client.getAuthToken(userAgent, xClientTime, xClientHash, clientId, clientSecret, grantType, getSecureUrl, username, password, refreshToken, &context).wait();
     println!("{:?}", result);
 
 }
@@ -1435,6 +1756,85 @@ pub fn main() {
                           <h2>Parameters</h2>
 
 
+                            <div class="methodsubtabletitle">Header parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                  <tr><td style="width:150px;">User-Agent*</td>
+<td>
+
+
+    <div id="d2e199_getAuthToken_userAgent">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">X-Client-Time*</td>
+<td>
+
+
+    <div id="d2e199_getAuthToken_xClientTime">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Date
+                </span>
+                    <span class="format">
+                        (date-time)
+                    </span>
+
+                    <div class="inner description marked">
+Current time in RFC3339 format. The timezone must be UTC, and must use &#x60;Z&#x60; instead of &#x60;+00:00&#x60;
+
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">X-Client-Hash*</td>
+<td>
+
+
+    <div id="d2e199_getAuthToken_xClientHash">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+The value of &#x60;md5(&lt;value of X-Client-Time&gt; || &lt;hash_secret&gt;)&#x60;  
+The hash secret is &#x60;28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c&#x60;.
+
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
 
 
                             <div class="methodsubtabletitle">Form parameters</div>
@@ -1646,7 +2046,7 @@ token.
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/AuthResult"
+        "$ref" : "#/components/schemas/AuthTokensResp"
       }
     }
   }
@@ -1712,7 +2112,7 @@ token.
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/Error"
+        "$ref" : "#/components/schemas/AuthError"
       }
     }
   }
@@ -1778,7 +2178,7 @@ token.
   "content" : {
     "application/json" : {
       "schema" : {
-        "$ref" : "#/components/schemas/Error"
+        "$ref" : "#/components/schemas/AuthError"
       }
     }
   }
@@ -1807,6 +2207,655 @@ token.
                                     </script>
                                   </div>
                                   <input id='responses-Auth-getAuthToken-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                  </section>
+                <section id="api-Illustration">
+                  <h1>Illustration</h1>
+                    <div id="api-Illustration-getIllustsRanking">
+                      <article id="api-Illustration-getIllustsRanking-0" data-group="User" data-name="getIllustsRanking" data-version="0">
+                        <div class="pull-left">
+                          <h1>getIllustsRanking</h1>
+                          <p>Returns the ranking of illustrations</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">It gets the raking of illustrations.  
+A filter can be used for filtering the illustrations, and control which kind of
+ranking should be used.  
+Login is required. 
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/illust/ranking</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Illustration-getIllustsRanking-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Illustration-getIllustsRanking-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Illustration-getIllustsRanking-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRanking-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Illustration-getIllustsRanking-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET -H "Accept: application/json" -H "Authorization: Basic [[basicHash]]" "https://app-api.pixiv.net/v1/illust/ranking?filter=&mode=&date=&offset="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.IllustrationApi;
+
+import java.io.File;
+import java.util.*;
+
+public class IllustrationApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        
+        // Configure HTTP basic authorization: bearer
+        HttpBasicAuth bearer = (HttpBasicAuth) defaultClient.getAuthentication("bearer");
+        bearer.setUsername("YOUR USERNAME");
+        bearer.setPassword("YOUR PASSWORD");
+
+        IllustrationApi apiInstance = new IllustrationApi();
+        String filter = filter_example; // String | The filter for different mobile platforms.
+TODO: What's the default?
+
+        String mode = mode_example; // String | Mode of the ranking.
+TODO What's the default?
+
+        String date = 2020-01-01; // String | This parameter can be used to query the ranking in the past.
+
+        Integer offset = 56; // Integer | The offset of the illustrations to query. Starting from 0.
+
+        try {
+            RankingIllustrations result = apiInstance.getIllustsRanking(filter, mode, date, offset);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling IllustrationApi#getIllustsRanking");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.IllustrationApi;
+
+public class IllustrationApiExample {
+
+    public static void main(String[] args) {
+        IllustrationApi apiInstance = new IllustrationApi();
+        String filter = filter_example; // String | The filter for different mobile platforms.
+TODO: What's the default?
+
+        String mode = mode_example; // String | Mode of the ranking.
+TODO What's the default?
+
+        String date = 2020-01-01; // String | This parameter can be used to query the ranking in the past.
+
+        Integer offset = 56; // Integer | The offset of the illustrations to query. Starting from 0.
+
+        try {
+            RankingIllustrations result = apiInstance.getIllustsRanking(filter, mode, date, offset);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling IllustrationApi#getIllustsRanking");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+// Configure HTTP basic authorization (authentication scheme: bearer)
+[apiConfig setUsername:@"YOUR_USERNAME"];
+[apiConfig setPassword:@"YOUR_PASSWORD"];
+
+String *filter = filter_example; // The filter for different mobile platforms.
+TODO: What's the default?
+ (optional) (default to null)
+String *mode = mode_example; // Mode of the ranking.
+TODO What's the default?
+ (optional) (default to null)
+String *date = 2020-01-01; // This parameter can be used to query the ranking in the past.
+ (optional) (default to null)
+Integer *offset = 56; // The offset of the illustrations to query. Starting from 0.
+ (optional) (default to 0)
+
+IllustrationApi *apiInstance = [[IllustrationApi alloc] init];
+
+// Returns the ranking of illustrations
+[apiInstance getIllustsRankingWith:filter
+    mode:mode
+    date:date
+    offset:offset
+              completionHandler: ^(RankingIllustrations output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var PixivApi = require('pixiv_api');
+var defaultClient = PixivApi.ApiClient.instance;
+
+// Configure HTTP basic authorization: bearer
+var bearer = defaultClient.authentications['bearer'];
+bearer.username = 'YOUR USERNAME'
+bearer.password = 'YOUR PASSWORD'
+
+var api = new PixivApi.IllustrationApi()
+var opts = {
+  'filter': filter_example, // {String} The filter for different mobile platforms.
+TODO: What's the default?
+
+  'mode': mode_example, // {String} Mode of the ranking.
+TODO What's the default?
+
+  'date': 2020-01-01, // {String} This parameter can be used to query the ranking in the past.
+
+  'offset': 56 // {Integer} The offset of the illustrations to query. Starting from 0.
+
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getIllustsRanking(opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getIllustsRankingExample
+    {
+        public void main()
+        {
+            
+            // Configure HTTP basic authorization: bearer
+            Configuration.Default.Username = "YOUR_USERNAME";
+            Configuration.Default.Password = "YOUR_PASSWORD";
+
+            var apiInstance = new IllustrationApi();
+            var filter = filter_example;  // String | The filter for different mobile platforms.
+TODO: What's the default?
+ (optional)  (default to null)
+            var mode = mode_example;  // String | Mode of the ranking.
+TODO What's the default?
+ (optional)  (default to null)
+            var date = 2020-01-01;  // String | This parameter can be used to query the ranking in the past.
+ (optional)  (default to null)
+            var offset = 56;  // Integer | The offset of the illustrations to query. Starting from 0.
+ (optional)  (default to 0)
+
+            try
+            {
+                // Returns the ranking of illustrations
+                RankingIllustrations result = apiInstance.getIllustsRanking(filter, mode, date, offset);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling IllustrationApi.getIllustsRanking: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Configure HTTP basic authorization: bearer
+OpenAPITools\Client\Configuration::getDefaultConfiguration()->setUsername('YOUR_USERNAME');
+OpenAPITools\Client\Configuration::getDefaultConfiguration()->setPassword('YOUR_PASSWORD');
+
+$api_instance = new OpenAPITools\Client\Api\IllustrationApi();
+$filter = filter_example; // String | The filter for different mobile platforms.
+TODO: What's the default?
+
+$mode = mode_example; // String | Mode of the ranking.
+TODO What's the default?
+
+$date = 2020-01-01; // String | This parameter can be used to query the ranking in the past.
+
+$offset = 56; // Integer | The offset of the illustrations to query. Starting from 0.
+
+
+try {
+    $result = $api_instance->getIllustsRanking($filter, $mode, $date, $offset);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling IllustrationApi->getIllustsRanking: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::IllustrationApi;
+
+# Configure HTTP basic authorization: bearer
+$WWW::OPenAPIClient::Configuration::username = 'YOUR_USERNAME';
+$WWW::OPenAPIClient::Configuration::password = 'YOUR_PASSWORD';
+
+my $api_instance = WWW::OPenAPIClient::IllustrationApi->new();
+my $filter = filter_example; # String | The filter for different mobile platforms.
+TODO: What's the default?
+
+my $mode = mode_example; # String | Mode of the ranking.
+TODO What's the default?
+
+my $date = 2020-01-01; # String | This parameter can be used to query the ranking in the past.
+
+my $offset = 56; # Integer | The offset of the illustrations to query. Starting from 0.
+
+
+eval { 
+    my $result = $api_instance->getIllustsRanking(filter => $filter, mode => $mode, date => $date, offset => $offset);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling IllustrationApi->getIllustsRanking: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Configure HTTP basic authorization: bearer
+openapi_client.configuration.username = 'YOUR_USERNAME'
+openapi_client.configuration.password = 'YOUR_PASSWORD'
+
+# create an instance of the API class
+api_instance = openapi_client.IllustrationApi()
+filter = filter_example # String | The filter for different mobile platforms.
+TODO: What's the default?
+ (optional) (default to null)
+mode = mode_example # String | Mode of the ranking.
+TODO What's the default?
+ (optional) (default to null)
+date = 2020-01-01 # String | This parameter can be used to query the ranking in the past.
+ (optional) (default to null)
+offset = 56 # Integer | The offset of the illustrations to query. Starting from 0.
+ (optional) (default to 0)
+
+try: 
+    # Returns the ranking of illustrations
+    api_response = api_instance.get_illusts_ranking(filter=filter, mode=mode, date=date, offset=offset)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling IllustrationApi->getIllustsRanking: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRanking-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate IllustrationApi;
+
+pub fn main() {
+    let filter = filter_example; // String
+    let mode = mode_example; // String
+    let date = 2020-01-01; // String
+    let offset = 56; // Integer
+
+    let mut context = IllustrationApi::Context::default();
+    let result = client.getIllustsRanking(filter, mode, date, offset, &context).wait();
+    println!("{:?}", result);
+
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">filter</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRanking_filter">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+The filter for different mobile platforms.
+TODO: What&#39;s the default?
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">mode</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRanking_mode">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+Mode of the ranking.
+TODO What&#39;s the default?
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">date</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRanking_date">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+This parameter can be used to query the ranking in the past.
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">offset</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRanking_offset">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description marked">
+The offset of the illustrations to query. Starting from 0.
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-Illustration-getIllustsRanking-title-200"></h3>
+                            <p id="examples-Illustration-getIllustsRanking-description-200" class="marked"></p>
+                            <script>
+                              var responseIllustration200_description = `Successfully get the illustrations.`;
+                              var responseIllustration200_description_break = responseIllustration200_description.indexOf('\n');
+                              if (responseIllustration200_description_break == -1) {
+                                $("#examples-Illustration-getIllustsRanking-title-200").text("Status: 200 - " + responseIllustration200_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsRanking-title-200").text("Status: 200 - " + responseIllustration200_description.substring(0, responseIllustration200_description_break));
+                                $("#examples-Illustration-getIllustsRanking-description-200").html(responseIllustration200_description.substring(responseIllustration200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsRanking-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsRanking-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsRanking-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsRanking-200-schema">
+                                  <div id="responses-Illustration-getIllustsRanking-schema-200" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Successfully get the illustrations.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/RankingIllustrations"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsRanking-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsRanking-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsRanking-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Illustration-getIllustsRanking-title-400"></h3>
+                            <p id="examples-Illustration-getIllustsRanking-description-400" class="marked"></p>
+                            <script>
+                              var responseIllustration400_description = `Invalid request.`;
+                              var responseIllustration400_description_break = responseIllustration400_description.indexOf('\n');
+                              if (responseIllustration400_description_break == -1) {
+                                $("#examples-Illustration-getIllustsRanking-title-400").text("Status: 400 - " + responseIllustration400_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsRanking-title-400").text("Status: 400 - " + responseIllustration400_description.substring(0, responseIllustration400_description_break));
+                                $("#examples-Illustration-getIllustsRanking-description-400").html(responseIllustration400_description.substring(responseIllustration400_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsRanking-400" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsRanking-400-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsRanking-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsRanking-400-schema">
+                                  <div id="responses-Illustration-getIllustsRanking-schema-400" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid request.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/APIError"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsRanking-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsRanking-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsRanking-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Illustration-getIllustsRanking-title-500"></h3>
+                            <p id="examples-Illustration-getIllustsRanking-description-500" class="marked"></p>
+                            <script>
+                              var responseIllustration500_description = `Internal server error.`;
+                              var responseIllustration500_description_break = responseIllustration500_description.indexOf('\n');
+                              if (responseIllustration500_description_break == -1) {
+                                $("#examples-Illustration-getIllustsRanking-title-500").text("Status: 500 - " + responseIllustration500_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsRanking-title-500").text("Status: 500 - " + responseIllustration500_description.substring(0, responseIllustration500_description_break));
+                                $("#examples-Illustration-getIllustsRanking-description-500").html(responseIllustration500_description.substring(responseIllustration500_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsRanking-500" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsRanking-500-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsRanking-500-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsRanking-500-schema">
+                                  <div id="responses-Illustration-getIllustsRanking-schema-500" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal server error.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/APIError"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsRanking-500-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsRanking-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsRanking-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
