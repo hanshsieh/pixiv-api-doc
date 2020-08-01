@@ -11,11 +11,17 @@ info:
     name: MIT License
     url: https://opensource.org/licenses/MIT
   version: 1.0.0
+servers:
+  - url: https://app-api.pixiv.net/v1
+    description: The API server.
+security:
+  - bearer: []
 paths:
   /auth/token:
     post:
       servers:
-        - url: https://oauth2.secure.pixiv.net
+        - url: https://oauth.secure.pixiv.net
+          description: The authentication server.
       tags:
         - auth
       summary: Create a new authentication token
@@ -28,6 +34,36 @@ paths:
           token.
         - `refresh_token`: Authenticate with a refresh token.
       operationId: getAuthToken
+      parameters: 
+        - name: "User-Agent"
+          in: header
+          schema:
+            type: string
+          required: true
+          examples: 
+            android:
+              value: "PixivAndroidApp/5.0.64 (Android 6.0)"
+            ios:
+              value: "PixivIOSApp/7.6.2 (iOS 12.0.1; iPhone8,2)"
+        - name: "X-Client-Time"
+          in: header
+          schema:
+            type: string
+            format: date-time
+          required: true
+          description: |
+            Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+          example: "2020-08-01T23:13:00Z"
+        - name: "X-Client-Hash"
+          in: header
+          required: true
+          example: "3aa8bb04754d6b260572822d2b8d9adf"
+          schema:
+            type: string
+          description: |
+            The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+            The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
+      security: []
       requestBody:
         description: Authentication parameters
         content:
@@ -44,20 +80,108 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResult'
+                $ref: '#/components/schemas/AuthTokensResp'
         400:
           description: Invalid request.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/AuthError'
         500:
           description: Internal server error.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/AuthError'
+  "/illust/ranking":
+    get:
+      tags:
+        - illustration
+      summary: Returns the ranking of illustrations
+      description: |
+        It gets the raking of illustrations.  
+        A filter can be used for filtering the illustrations, and control which kind of
+        ranking should be used.  
+        Login is required. 
+      operationId: getIllustsRanking
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: 
+              - for_ios
+              - for_android
+          description: |
+            The filter for different mobile platforms.
+            TODO: What's the default?
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - day
+              - day_male
+              - day_female
+              - week_original
+              - week_rookie
+              - month_rookie
+              - week
+              - month
+              - day_r18
+              - week_r18
+              - week_r18g
+              - day_male_r18
+              - day_female_r18
+              - day_manga
+              - week_manga
+              - month_manga
+          description: |
+            Mode of the ranking.
+            TODO What's the default?
+        - name: date
+          in: query
+          schema:
+            type: string
+            pattern: \d{4}-\d{2}-\d{2}
+          required: false
+          example: "2020-01-01"
+          description: |
+            This parameter can be used to query the ranking in the past.
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            The offset of the illustrations to query. Starting from 0.
+      responses:
+        200:
+          description: Successfully get the illustrations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RankingIllustrations'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
 components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: Bearer
   schemas:
     AuthTokenCreate:
       required:
@@ -104,12 +228,17 @@ components:
           description: |
             This property is required when the `grant_type` is `refresh_token`, and it specified the refresh
             token.
-    AuthResult:
-      type: object
-      properties:
-        response:
-          $ref: '#/components/schemas/AuthToken'
-    AuthToken:
+    AuthTokensResp:
+      description: |
+        The schema inside `response` has the same schema as the top-level fields of this object. It's possibly 
+        to provide backward compatibality.  
+      allOf:
+        - $ref: '#/components/schemas/AuthTokens'
+        - type: object
+          properties:
+            response:
+              $ref: '#/components/schemas/AuthTokens'
+    AuthTokens:
       type: object
       properties:
         access_token:
@@ -128,14 +257,14 @@ components:
           example: ""
         refresh_token:
           type: string
-          description:
+          description: |
             The token that can be used to get a refreshed access token within expiry time without doing
             the authentication again.
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/FullUser'
         device_token:
           type: string
-    User:
+    FullUser:
       type: object
       properties:
         profile_image_urls: 
@@ -184,23 +313,209 @@ components:
           type: boolean
           description: |
             Whether the email of the user has been validated.
-    Error:
+    RankingIllustrations:
+      type: object
+      properties:
+        illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
+      required:
+        - illusts
+    Illustration:
+      type: object
+      properties:
+        id: 
+          type: integer
+          format: int64
+          example: 83314745
+        title:
+          type: string
+          example: "アリス・シンセシス・サーティ/cap"
+        type: 
+          type: string
+          enum:
+            - illust
+            - ugoira
+            - manga
+        image_urls:
+          $ref: '#/components/schemas/IllustImageURLs'
+        caption:
+          type: string
+          example: "何気に商人だけのサムネって初めてでは？"
+        restrict:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        tools:
+          type: array
+          items:
+            type: string
+            description: The tools used for creating the illustration.
+            example: "CLIP STUDIO PAINT"
+        create_date:
+          type: string
+          format: date-time
+        page_count:
+          type: integer
+          description: Total number of pages for the illustration.
+        width:
+          type: integer
+          example: 1240
+        height:
+          type: integer
+          example: 2089
+        sanity_level:
+          type: integer
+        x_restrict:
+          type: integer
+        series:
+          $ref: '#/components/schemas/Series'
+        meta_single_page:
+          $ref: '#/components/schemas/MetaSinglePage'
+        meta_pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaPage'
+        total_view:
+          type: integer
+        total_bookmarks:
+          type: integer
+        is_bookmarked:
+          type: boolean
+        visible:
+          type: boolean
+        is_muted:
+          type: boolean
+    MetaPage:
+      type: object
+      description: |
+        It contains the information of one of the multiple pages of an illustration.
+      properties:
+        image_urls:
+          $ref: '#/components/schemas/MetaPageImageURLs'  
+    MetaPageImageURLs:
+      type: object
+      description: contains the image URLs of a meta page.
+      properties:
+        square_medium:
+          type: string
+          example: "https://i.pximg.net/c/360x360_70/img-master/img/2020/07/31/19/34/58/83348083_p0_square1200.jpg"
+        medium:
+          type: string
+          example: "https://i.pximg.net/c/540x540_70/img-master/img/2020/07/31/19/34/58/83348083_p0_master1200.jpg"
+        large:
+          type: string
+          example: "https://i.pximg.net/c/600x1200_90/img-master/img/2020/07/31/19/34/58/83348083_p0_master1200.jpg"
+        original:
+          type: string
+          example: "https://i.pximg.net/img-original/img/2020/07/31/19/34/58/83348083_p0.jpg"
+    MetaSinglePage:
+      type: object
+      description: |
+        It contains the image URLs when the illustration contain only a single image.  
+      properties:
+        original_image_url:
+          type: string
+          description: The URL to the original size of the illustration.
+          example: "https://i.pximg.net/img-original/img/2020/07/30/00/26/33/83314745_p0.png"
+    Series:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+    Tag:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Fate/GrandOrder"
+        translated_name:
+          type: string
+      required:
+        - name
+    IllustImageURLs:
+      type: object
+      properties:
+        square_medium: 
+          type: string
+          example: "https://i.pximg.net/c/360x360_70/img-master/img/2020/07/30/00/26/33/83314745_p0_square1200.jpg"
+        medium:
+          type: string
+          example:  "https://i.pximg.net/c/540x540_70/img-master/img/2020/07/30/00/26/33/83314745_p0_master1200.jpg"
+        large:
+          type: string
+          example: "https://i.pximg.net/c/600x1200_90/img-master/img/2020/07/30/00/26/33/83314745_p0_master1200.jpg"
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        profile_image_urls:
+          type: object
+          properties:
+            medium:
+              type: string
+              example: "https://i.pximg.net/user-profile/img/2020/02/03/16/33/15/17853306_774cadacc6003ba8aa04ea1b754e8755_170.jpg"
+        name: 
+          type: string
+        account:
+          type: string
+          description: Account name.
+        is_followed:
+          type: boolean
+    AuthError:
       type: object
       properties:
         has_error:
           type: boolean
           example: true
         errors:
+          $ref: '#/components/schemas/AuthErrorDetails'
+        error:
+          type: string
+          example: "invalid_grant"
+    AuthErrorDetails:
+      type: object
+      properties:
+        system:
           type: object
           properties:
-            system:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Invalid grant_type parameter or parameter missing
-                code:
-                  type: integer
-                  example: 1508
+            message:
+              type: string
+              example: Invalid grant_type parameter or parameter missing
+            code:
+              type: integer
+              example: 1508
+      description: Details of the error. The keys will be the category of the error.
+    APIError:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/APIErrorDetails'
+    APIErrorDetails:
+      type: object
+      properties:
+        user_message:
+          type: string
+        message:
+          type: string
+        reason:
+          type: string
+        user_message_details:
+          type: object
           description: |
-            Details of the error. The keys will be the category of the error.
+            Details of the error. The schema depends on the error type.
