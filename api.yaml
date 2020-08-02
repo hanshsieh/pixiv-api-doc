@@ -109,10 +109,7 @@ paths:
           in: query
           required: false
           schema:
-            type: string
-            enum: 
-              - for_ios
-              - for_android
+            $ref: '#/components/schemas/IllustFilter'
           description: |
             The filter for different mobile platforms.
             TODO: What's the default?
@@ -165,6 +162,118 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RankingIllustrations'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/illust/recommended":
+    get:
+      tags:
+        - illustration
+      summary: Returns the recommended illustrations based on the logged in user's preference
+      description: |
+        It returns the recommended illustrations based on the logged in user's preference.
+        It needs login.  
+        There's another API for getting recommended illustrations for not logged-in users.
+      operationId: getIllustsRecommend
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IllustFilter'
+          description: |
+            The filter for different mobile platforms.
+            TODO: What's the default?
+        - name: min_bookmark_id_for_recent_illust
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            **TODO**
+        - name: max_bookmark_id_for_recommend
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            **TODO**
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            The offset of the illustrations to query. Starting from 0.
+        - name: include_ranking_illusts
+          in: query
+          schema:
+            type: boolean
+          description: |
+            It indicates that whether the illustration ranking should also be included
+            in the result.  
+            Notice that even if it's set to `true`, the `next_url` in the response will still
+            set it to false.  
+        - name: include_privacy_policy
+          in: query
+          schema:
+            type: boolean
+          description: |
+            It indicates that whether the privacy policy info should also be included
+            in the result.  
+            Notice that even if it's set to true, the `next_url` in the response will still
+            set it to false.  
+      responses:
+        200:
+          description: Successfully get the illustrations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendIllustrations'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/illust/detail":
+    get:
+      tags:
+        - illustration
+      summary: Returns the details of an illustration
+      description: |
+        It returns the details of an illustration.  
+        It needs login.  
+      operationId: getIllustsDetail
+      parameters:
+        - name: illust_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/IllustId" 
+      responses:
+        200:
+          description: Successfully get the illustrations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IllustrationDetail'
         400:
           description: Invalid request.
           content:
@@ -327,13 +436,17 @@ components:
           example: "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
       required:
         - illusts
+    IllustId:
+      type: integer
+      format: int64
+      description: |
+        Illustration ID.  
+      example: 83314745
     Illustration:
       type: object
       properties:
         id: 
-          type: integer
-          format: int64
-          example: 83314745
+          $ref: "#/components/schemas/IllustId"
         title:
           type: string
           example: "アリス・シンセシス・サーティ/cap"
@@ -477,6 +590,49 @@ components:
           description: Account name.
         is_followed:
           type: boolean
+    IllustFilter:
+      type: string
+      enum: 
+        - for_ios
+        - for_android
+    RecommendIllustrations:
+      type: object
+      properties:
+        illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        ranking_illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        contest_exists:
+          type: boolean
+        privacy_policy:
+          $ref: '#/components/schemas/PrivacyPolicy'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
+      required:
+        - illusts
+    PrivacyPolicy:
+      type: object
+      properties:
+        version:
+          type: string
+        message:
+          type: string
+        url:
+          type: string
+    IllustrationDetail:
+      type: object
+      properties:
+        illust:
+          $ref: "#/components/schemas/Illustration"
+      required:
+        - illust
     AuthError:
       type: object
       properties:
