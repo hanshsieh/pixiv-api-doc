@@ -1045,6 +1045,10 @@ ul.nav-tabs {
   },
   "description" : "User's profile image URLs.  \nIf the user doesn't set a profile image, URLs to a default image will be used.\n"
 };
+    defs["IllustFilter"] = {
+  "type" : "string",
+  "enum" : [ "for_ios", "for_android" ]
+};
     defs["IllustImageURLs"] = {
   "type" : "object",
   "properties" : {
@@ -1066,9 +1070,7 @@ ul.nav-tabs {
   "type" : "object",
   "properties" : {
     "id" : {
-      "type" : "integer",
-      "format" : "int64",
-      "example" : 83314745
+      "$ref" : "#/components/schemas/IllustId"
     },
     "title" : {
       "type" : "string",
@@ -1156,6 +1158,15 @@ ul.nav-tabs {
     }
   }
 };
+    defs["IllustrationDetail"] = {
+  "required" : [ "illust" ],
+  "type" : "object",
+  "properties" : {
+    "illust" : {
+      "$ref" : "#/components/schemas/Illustration"
+    }
+  }
+};
     defs["MetaPage"] = {
   "type" : "object",
   "properties" : {
@@ -1198,6 +1209,20 @@ ul.nav-tabs {
   },
   "description" : "It contains the image URLs when the illustration contain only a single image.  \n"
 };
+    defs["PrivacyPolicy"] = {
+  "type" : "object",
+  "properties" : {
+    "version" : {
+      "type" : "string"
+    },
+    "message" : {
+      "type" : "string"
+    },
+    "url" : {
+      "type" : "string"
+    }
+  }
+};
     defs["RankingIllustrations"] = {
   "required" : [ "illusts" ],
   "type" : "object",
@@ -1207,6 +1232,35 @@ ul.nav-tabs {
       "items" : {
         "$ref" : "#/components/schemas/Illustration"
       }
+    },
+    "next_url" : {
+      "type" : "string",
+      "description" : "The next URL that can be used for querying the next page, if any.\n",
+      "example" : "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
+    }
+  }
+};
+    defs["RecommendIllustrations"] = {
+  "required" : [ "illusts" ],
+  "type" : "object",
+  "properties" : {
+    "illusts" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Illustration"
+      }
+    },
+    "ranking_illusts" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/Illustration"
+      }
+    },
+    "contest_exists" : {
+      "type" : "boolean"
+    },
+    "privacy_policy" : {
+      "$ref" : "#/components/schemas/PrivacyPolicy"
     },
     "next_url" : {
       "type" : "string",
@@ -1293,8 +1347,14 @@ ul.nav-tabs {
                       <a href="#api-Auth-getAuthToken">getAuthToken</a>
                     </li>
                   <li class="nav-header" data-group="Illustration"><a href="#api-Illustration">API Methods - Illustration</a></li>
+                    <li data-group="Illustration" data-name="getIllustsDetail" class="">
+                      <a href="#api-Illustration-getIllustsDetail">getIllustsDetail</a>
+                    </li>
                     <li data-group="Illustration" data-name="getIllustsRanking" class="">
                       <a href="#api-Illustration-getIllustsRanking">getIllustsRanking</a>
+                    </li>
+                    <li data-group="Illustration" data-name="getIllustsRecommend" class="">
+                      <a href="#api-Illustration-getIllustsRecommend">getIllustsRecommend</a>
                     </li>
           </ul>
         </nav>
@@ -2215,6 +2275,506 @@ token.
                   </section>
                 <section id="api-Illustration">
                   <h1>Illustration</h1>
+                    <div id="api-Illustration-getIllustsDetail">
+                      <article id="api-Illustration-getIllustsDetail-0" data-group="User" data-name="getIllustsDetail" data-version="0">
+                        <div class="pull-left">
+                          <h1>getIllustsDetail</h1>
+                          <p>Returns the details of an illustration</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">It returns the details of an illustration.  
+It needs login.  
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/illust/detail</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Illustration-getIllustsDetail-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Illustration-getIllustsDetail-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Illustration-getIllustsDetail-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsDetail-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Illustration-getIllustsDetail-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET -H "Accept: application/json" -H "Authorization: Basic [[basicHash]]" "https://app-api.pixiv.net/v1/illust/detail?illust_id="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.IllustrationApi;
+
+import java.io.File;
+import java.util.*;
+
+public class IllustrationApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        
+        // Configure HTTP basic authorization: bearer
+        HttpBasicAuth bearer = (HttpBasicAuth) defaultClient.getAuthentication("bearer");
+        bearer.setUsername("YOUR USERNAME");
+        bearer.setPassword("YOUR PASSWORD");
+
+        IllustrationApi apiInstance = new IllustrationApi();
+        Long illustId = 789; // Long | 
+        try {
+            IllustrationDetail result = apiInstance.getIllustsDetail(illustId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling IllustrationApi#getIllustsDetail");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.IllustrationApi;
+
+public class IllustrationApiExample {
+
+    public static void main(String[] args) {
+        IllustrationApi apiInstance = new IllustrationApi();
+        Long illustId = 789; // Long | 
+        try {
+            IllustrationDetail result = apiInstance.getIllustsDetail(illustId);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling IllustrationApi#getIllustsDetail");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+// Configure HTTP basic authorization (authentication scheme: bearer)
+[apiConfig setUsername:@"YOUR_USERNAME"];
+[apiConfig setPassword:@"YOUR_PASSWORD"];
+
+Long *illustId = 789; //  (optional) (default to null)
+
+IllustrationApi *apiInstance = [[IllustrationApi alloc] init];
+
+// Returns the details of an illustration
+[apiInstance getIllustsDetailWith:illustId
+              completionHandler: ^(IllustrationDetail output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var PixivApi = require('pixiv_api');
+var defaultClient = PixivApi.ApiClient.instance;
+
+// Configure HTTP basic authorization: bearer
+var bearer = defaultClient.authentications['bearer'];
+bearer.username = 'YOUR USERNAME'
+bearer.password = 'YOUR PASSWORD'
+
+var api = new PixivApi.IllustrationApi()
+var opts = {
+  'illustId': 789 // {Long} 
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getIllustsDetail(opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getIllustsDetailExample
+    {
+        public void main()
+        {
+            
+            // Configure HTTP basic authorization: bearer
+            Configuration.Default.Username = "YOUR_USERNAME";
+            Configuration.Default.Password = "YOUR_PASSWORD";
+
+            var apiInstance = new IllustrationApi();
+            var illustId = 789;  // Long |  (optional)  (default to null)
+
+            try
+            {
+                // Returns the details of an illustration
+                IllustrationDetail result = apiInstance.getIllustsDetail(illustId);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling IllustrationApi.getIllustsDetail: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Configure HTTP basic authorization: bearer
+OpenAPITools\Client\Configuration::getDefaultConfiguration()->setUsername('YOUR_USERNAME');
+OpenAPITools\Client\Configuration::getDefaultConfiguration()->setPassword('YOUR_PASSWORD');
+
+$api_instance = new OpenAPITools\Client\Api\IllustrationApi();
+$illustId = 789; // Long | 
+
+try {
+    $result = $api_instance->getIllustsDetail($illustId);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling IllustrationApi->getIllustsDetail: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::IllustrationApi;
+
+# Configure HTTP basic authorization: bearer
+$WWW::OPenAPIClient::Configuration::username = 'YOUR_USERNAME';
+$WWW::OPenAPIClient::Configuration::password = 'YOUR_PASSWORD';
+
+my $api_instance = WWW::OPenAPIClient::IllustrationApi->new();
+my $illustId = 789; # Long | 
+
+eval { 
+    my $result = $api_instance->getIllustsDetail(illustId => $illustId);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling IllustrationApi->getIllustsDetail: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Configure HTTP basic authorization: bearer
+openapi_client.configuration.username = 'YOUR_USERNAME'
+openapi_client.configuration.password = 'YOUR_PASSWORD'
+
+# create an instance of the API class
+api_instance = openapi_client.IllustrationApi()
+illustId = 789 # Long |  (optional) (default to null)
+
+try: 
+    # Returns the details of an illustration
+    api_response = api_instance.get_illusts_detail(illustId=illustId)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling IllustrationApi->getIllustsDetail: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsDetail-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate IllustrationApi;
+
+pub fn main() {
+    let illustId = 789; // Long
+
+    let mut context = IllustrationApi::Context::default();
+    let result = client.getIllustsDetail(illustId, &context).wait();
+    println!("{:?}", result);
+
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">illust_id</td>
+<td>
+
+
+    <div id="d2e199_getIllustsDetail_illustId">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-Illustration-getIllustsDetail-title-200"></h3>
+                            <p id="examples-Illustration-getIllustsDetail-description-200" class="marked"></p>
+                            <script>
+                              var responseIllustration200_description = `Successfully get the illustrations.`;
+                              var responseIllustration200_description_break = responseIllustration200_description.indexOf('\n');
+                              if (responseIllustration200_description_break == -1) {
+                                $("#examples-Illustration-getIllustsDetail-title-200").text("Status: 200 - " + responseIllustration200_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsDetail-title-200").text("Status: 200 - " + responseIllustration200_description.substring(0, responseIllustration200_description_break));
+                                $("#examples-Illustration-getIllustsDetail-description-200").html(responseIllustration200_description.substring(responseIllustration200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsDetail-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsDetail-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsDetail-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsDetail-200-schema">
+                                  <div id="responses-Illustration-getIllustsDetail-schema-200" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Successfully get the illustrations.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/IllustrationDetail"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsDetail-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsDetail-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsDetail-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Illustration-getIllustsDetail-title-400"></h3>
+                            <p id="examples-Illustration-getIllustsDetail-description-400" class="marked"></p>
+                            <script>
+                              var responseIllustration400_description = `Invalid request.`;
+                              var responseIllustration400_description_break = responseIllustration400_description.indexOf('\n');
+                              if (responseIllustration400_description_break == -1) {
+                                $("#examples-Illustration-getIllustsDetail-title-400").text("Status: 400 - " + responseIllustration400_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsDetail-title-400").text("Status: 400 - " + responseIllustration400_description.substring(0, responseIllustration400_description_break));
+                                $("#examples-Illustration-getIllustsDetail-description-400").html(responseIllustration400_description.substring(responseIllustration400_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsDetail-400" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsDetail-400-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsDetail-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsDetail-400-schema">
+                                  <div id="responses-Illustration-getIllustsDetail-schema-400" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid request.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/APIError"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsDetail-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsDetail-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsDetail-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Illustration-getIllustsDetail-title-500"></h3>
+                            <p id="examples-Illustration-getIllustsDetail-description-500" class="marked"></p>
+                            <script>
+                              var responseIllustration500_description = `Internal server error.`;
+                              var responseIllustration500_description_break = responseIllustration500_description.indexOf('\n');
+                              if (responseIllustration500_description_break == -1) {
+                                $("#examples-Illustration-getIllustsDetail-title-500").text("Status: 500 - " + responseIllustration500_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsDetail-title-500").text("Status: 500 - " + responseIllustration500_description.substring(0, responseIllustration500_description_break));
+                                $("#examples-Illustration-getIllustsDetail-description-500").html(responseIllustration500_description.substring(responseIllustration500_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsDetail-500" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsDetail-500-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsDetail-500-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsDetail-500-schema">
+                                  <div id="responses-Illustration-getIllustsDetail-schema-500" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal server error.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/APIError"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsDetail-500-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsDetail-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsDetail-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Illustration-getIllustsRanking">
                       <article id="api-Illustration-getIllustsRanking-0" data-group="User" data-name="getIllustsRanking" data-version="0">
                         <div class="pull-left">
@@ -2274,7 +2834,7 @@ public class IllustrationApiExample {
         bearer.setPassword("YOUR PASSWORD");
 
         IllustrationApi apiInstance = new IllustrationApi();
-        String filter = filter_example; // String | The filter for different mobile platforms.
+        IllustFilter filter = ; // IllustFilter | The filter for different mobile platforms.
 TODO: What's the default?
 
         String mode = mode_example; // String | Mode of the ranking.
@@ -2303,7 +2863,7 @@ public class IllustrationApiExample {
 
     public static void main(String[] args) {
         IllustrationApi apiInstance = new IllustrationApi();
-        String filter = filter_example; // String | The filter for different mobile platforms.
+        IllustFilter filter = ; // IllustFilter | The filter for different mobile platforms.
 TODO: What's the default?
 
         String mode = mode_example; // String | Mode of the ranking.
@@ -2333,7 +2893,7 @@ TODO What's the default?
 [apiConfig setUsername:@"YOUR_USERNAME"];
 [apiConfig setPassword:@"YOUR_PASSWORD"];
 
-String *filter = filter_example; // The filter for different mobile platforms.
+IllustFilter *filter = ; // The filter for different mobile platforms.
 TODO: What's the default?
  (optional) (default to null)
 String *mode = mode_example; // Mode of the ranking.
@@ -2373,7 +2933,7 @@ bearer.password = 'YOUR PASSWORD'
 
 var api = new PixivApi.IllustrationApi()
 var opts = {
-  'filter': filter_example, // {String} The filter for different mobile platforms.
+  'filter': , // {IllustFilter} The filter for different mobile platforms.
 TODO: What's the default?
 
   'mode': mode_example, // {String} Mode of the ranking.
@@ -2418,7 +2978,7 @@ namespace Example
             Configuration.Default.Password = "YOUR_PASSWORD";
 
             var apiInstance = new IllustrationApi();
-            var filter = filter_example;  // String | The filter for different mobile platforms.
+            var filter = new IllustFilter(); // IllustFilter | The filter for different mobile platforms.
 TODO: What's the default?
  (optional)  (default to null)
             var mode = mode_example;  // String | Mode of the ranking.
@@ -2454,7 +3014,7 @@ OpenAPITools\Client\Configuration::getDefaultConfiguration()->setUsername('YOUR_
 OpenAPITools\Client\Configuration::getDefaultConfiguration()->setPassword('YOUR_PASSWORD');
 
 $api_instance = new OpenAPITools\Client\Api\IllustrationApi();
-$filter = filter_example; // String | The filter for different mobile platforms.
+$filter = ; // IllustFilter | The filter for different mobile platforms.
 TODO: What's the default?
 
 $mode = mode_example; // String | Mode of the ranking.
@@ -2484,7 +3044,7 @@ $WWW::OPenAPIClient::Configuration::username = 'YOUR_USERNAME';
 $WWW::OPenAPIClient::Configuration::password = 'YOUR_PASSWORD';
 
 my $api_instance = WWW::OPenAPIClient::IllustrationApi->new();
-my $filter = filter_example; # String | The filter for different mobile platforms.
+my $filter = ; # IllustFilter | The filter for different mobile platforms.
 TODO: What's the default?
 
 my $mode = mode_example; # String | Mode of the ranking.
@@ -2517,7 +3077,7 @@ openapi_client.configuration.password = 'YOUR_PASSWORD'
 
 # create an instance of the API class
 api_instance = openapi_client.IllustrationApi()
-filter = filter_example # String | The filter for different mobile platforms.
+filter =  # IllustFilter | The filter for different mobile platforms.
 TODO: What's the default?
  (optional) (default to null)
 mode = mode_example # String | Mode of the ranking.
@@ -2540,7 +3100,7 @@ except ApiException as e:
                               <pre class="prettyprint"><code class="language-rust">extern crate IllustrationApi;
 
 pub fn main() {
-    let filter = filter_example; // String
+    let filter = ; // IllustFilter
     let mode = mode_example; // String
     let date = 2020-01-01; // String
     let offset = 56; // Integer
@@ -2579,7 +3139,7 @@ pub fn main() {
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    String
+                    IllustFilter
                 </span>
 
                     <div class="inner description marked">
@@ -2856,6 +3416,774 @@ The offset of the illustrations to query. Starting from 0.
                                     </script>
                                   </div>
                                   <input id='responses-Illustration-getIllustsRanking-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Illustration-getIllustsRecommend">
+                      <article id="api-Illustration-getIllustsRecommend-0" data-group="User" data-name="getIllustsRecommend" data-version="0">
+                        <div class="pull-left">
+                          <h1>getIllustsRecommend</h1>
+                          <p>Returns the recommended illustrations based on the logged in user&#39;s preference</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">It returns the recommended illustrations based on the logged in user&#39;s preference.
+It needs login.  
+There&#39;s another API for getting recommended illustrations for not logged-in users.
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/illust/recommended</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Illustration-getIllustsRecommend-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Illustration-getIllustsRecommend-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Illustration-getIllustsRecommend-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Illustration-getIllustsRecommend-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Illustration-getIllustsRecommend-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET -H "Accept: application/json" -H "Authorization: Basic [[basicHash]]" "https://app-api.pixiv.net/v1/illust/recommended?filter=&min_bookmark_id_for_recent_illust=&max_bookmark_id_for_recommend=&offset=&include_ranking_illusts=&include_privacy_policy="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.IllustrationApi;
+
+import java.io.File;
+import java.util.*;
+
+public class IllustrationApiExample {
+
+    public static void main(String[] args) {
+        ApiClient defaultClient = Configuration.getDefaultApiClient();
+        
+        // Configure HTTP basic authorization: bearer
+        HttpBasicAuth bearer = (HttpBasicAuth) defaultClient.getAuthentication("bearer");
+        bearer.setUsername("YOUR USERNAME");
+        bearer.setPassword("YOUR PASSWORD");
+
+        IllustrationApi apiInstance = new IllustrationApi();
+        IllustFilter filter = ; // IllustFilter | The filter for different mobile platforms.
+TODO: What's the default?
+
+        String minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example; // String | **TODO**
+
+        String maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example; // String | **TODO**
+
+        Integer offset = 56; // Integer | The offset of the illustrations to query. Starting from 0.
+
+        Boolean includeRankingIllusts = true; // Boolean | It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+
+        Boolean includePrivacyPolicy = true; // Boolean | It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+
+        try {
+            RecommendIllustrations result = apiInstance.getIllustsRecommend(filter, minBookmarkIdForRecentIllust, maxBookmarkIdForRecommend, offset, includeRankingIllusts, includePrivacyPolicy);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling IllustrationApi#getIllustsRecommend");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.IllustrationApi;
+
+public class IllustrationApiExample {
+
+    public static void main(String[] args) {
+        IllustrationApi apiInstance = new IllustrationApi();
+        IllustFilter filter = ; // IllustFilter | The filter for different mobile platforms.
+TODO: What's the default?
+
+        String minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example; // String | **TODO**
+
+        String maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example; // String | **TODO**
+
+        Integer offset = 56; // Integer | The offset of the illustrations to query. Starting from 0.
+
+        Boolean includeRankingIllusts = true; // Boolean | It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+
+        Boolean includePrivacyPolicy = true; // Boolean | It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+
+        try {
+            RecommendIllustrations result = apiInstance.getIllustsRecommend(filter, minBookmarkIdForRecentIllust, maxBookmarkIdForRecommend, offset, includeRankingIllusts, includePrivacyPolicy);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling IllustrationApi#getIllustsRecommend");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Configuration *apiConfig = [Configuration sharedConfig];
+// Configure HTTP basic authorization (authentication scheme: bearer)
+[apiConfig setUsername:@"YOUR_USERNAME"];
+[apiConfig setPassword:@"YOUR_PASSWORD"];
+
+IllustFilter *filter = ; // The filter for different mobile platforms.
+TODO: What's the default?
+ (optional) (default to null)
+String *minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example; // **TODO**
+ (optional) (default to null)
+String *maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example; // **TODO**
+ (optional) (default to null)
+Integer *offset = 56; // The offset of the illustrations to query. Starting from 0.
+ (optional) (default to 0)
+Boolean *includeRankingIllusts = true; // It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+ (optional) (default to null)
+Boolean *includePrivacyPolicy = true; // It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+ (optional) (default to null)
+
+IllustrationApi *apiInstance = [[IllustrationApi alloc] init];
+
+// Returns the recommended illustrations based on the logged in user's preference
+[apiInstance getIllustsRecommendWith:filter
+    minBookmarkIdForRecentIllust:minBookmarkIdForRecentIllust
+    maxBookmarkIdForRecommend:maxBookmarkIdForRecommend
+    offset:offset
+    includeRankingIllusts:includeRankingIllusts
+    includePrivacyPolicy:includePrivacyPolicy
+              completionHandler: ^(RecommendIllustrations output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var PixivApi = require('pixiv_api');
+var defaultClient = PixivApi.ApiClient.instance;
+
+// Configure HTTP basic authorization: bearer
+var bearer = defaultClient.authentications['bearer'];
+bearer.username = 'YOUR USERNAME'
+bearer.password = 'YOUR PASSWORD'
+
+var api = new PixivApi.IllustrationApi()
+var opts = {
+  'filter': , // {IllustFilter} The filter for different mobile platforms.
+TODO: What's the default?
+
+  'minBookmarkIdForRecentIllust': minBookmarkIdForRecentIllust_example, // {String} **TODO**
+
+  'maxBookmarkIdForRecommend': maxBookmarkIdForRecommend_example, // {String} **TODO**
+
+  'offset': 56, // {Integer} The offset of the illustrations to query. Starting from 0.
+
+  'includeRankingIllusts': true, // {Boolean} It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+
+  'includePrivacyPolicy': true // {Boolean} It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getIllustsRecommend(opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getIllustsRecommendExample
+    {
+        public void main()
+        {
+            
+            // Configure HTTP basic authorization: bearer
+            Configuration.Default.Username = "YOUR_USERNAME";
+            Configuration.Default.Password = "YOUR_PASSWORD";
+
+            var apiInstance = new IllustrationApi();
+            var filter = new IllustFilter(); // IllustFilter | The filter for different mobile platforms.
+TODO: What's the default?
+ (optional)  (default to null)
+            var minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example;  // String | **TODO**
+ (optional)  (default to null)
+            var maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example;  // String | **TODO**
+ (optional)  (default to null)
+            var offset = 56;  // Integer | The offset of the illustrations to query. Starting from 0.
+ (optional)  (default to 0)
+            var includeRankingIllusts = true;  // Boolean | It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+ (optional)  (default to null)
+            var includePrivacyPolicy = true;  // Boolean | It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+ (optional)  (default to null)
+
+            try
+            {
+                // Returns the recommended illustrations based on the logged in user's preference
+                RecommendIllustrations result = apiInstance.getIllustsRecommend(filter, minBookmarkIdForRecentIllust, maxBookmarkIdForRecommend, offset, includeRankingIllusts, includePrivacyPolicy);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling IllustrationApi.getIllustsRecommend: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Configure HTTP basic authorization: bearer
+OpenAPITools\Client\Configuration::getDefaultConfiguration()->setUsername('YOUR_USERNAME');
+OpenAPITools\Client\Configuration::getDefaultConfiguration()->setPassword('YOUR_PASSWORD');
+
+$api_instance = new OpenAPITools\Client\Api\IllustrationApi();
+$filter = ; // IllustFilter | The filter for different mobile platforms.
+TODO: What's the default?
+
+$minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example; // String | **TODO**
+
+$maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example; // String | **TODO**
+
+$offset = 56; // Integer | The offset of the illustrations to query. Starting from 0.
+
+$includeRankingIllusts = true; // Boolean | It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+
+$includePrivacyPolicy = true; // Boolean | It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+
+
+try {
+    $result = $api_instance->getIllustsRecommend($filter, $minBookmarkIdForRecentIllust, $maxBookmarkIdForRecommend, $offset, $includeRankingIllusts, $includePrivacyPolicy);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling IllustrationApi->getIllustsRecommend: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::IllustrationApi;
+
+# Configure HTTP basic authorization: bearer
+$WWW::OPenAPIClient::Configuration::username = 'YOUR_USERNAME';
+$WWW::OPenAPIClient::Configuration::password = 'YOUR_PASSWORD';
+
+my $api_instance = WWW::OPenAPIClient::IllustrationApi->new();
+my $filter = ; # IllustFilter | The filter for different mobile platforms.
+TODO: What's the default?
+
+my $minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example; # String | **TODO**
+
+my $maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example; # String | **TODO**
+
+my $offset = 56; # Integer | The offset of the illustrations to query. Starting from 0.
+
+my $includeRankingIllusts = true; # Boolean | It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+
+my $includePrivacyPolicy = true; # Boolean | It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+
+
+eval { 
+    my $result = $api_instance->getIllustsRecommend(filter => $filter, minBookmarkIdForRecentIllust => $minBookmarkIdForRecentIllust, maxBookmarkIdForRecommend => $maxBookmarkIdForRecommend, offset => $offset, includeRankingIllusts => $includeRankingIllusts, includePrivacyPolicy => $includePrivacyPolicy);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling IllustrationApi->getIllustsRecommend: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Configure HTTP basic authorization: bearer
+openapi_client.configuration.username = 'YOUR_USERNAME'
+openapi_client.configuration.password = 'YOUR_PASSWORD'
+
+# create an instance of the API class
+api_instance = openapi_client.IllustrationApi()
+filter =  # IllustFilter | The filter for different mobile platforms.
+TODO: What's the default?
+ (optional) (default to null)
+minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example # String | **TODO**
+ (optional) (default to null)
+maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example # String | **TODO**
+ (optional) (default to null)
+offset = 56 # Integer | The offset of the illustrations to query. Starting from 0.
+ (optional) (default to 0)
+includeRankingIllusts = true # Boolean | It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it's set to `true`, the `next_url` in the response will still
+set it to false.  
+ (optional) (default to null)
+includePrivacyPolicy = true # Boolean | It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it's set to true, the `next_url` in the response will still
+set it to false.  
+ (optional) (default to null)
+
+try: 
+    # Returns the recommended illustrations based on the logged in user's preference
+    api_response = api_instance.get_illusts_recommend(filter=filter, minBookmarkIdForRecentIllust=minBookmarkIdForRecentIllust, maxBookmarkIdForRecommend=maxBookmarkIdForRecommend, offset=offset, includeRankingIllusts=includeRankingIllusts, includePrivacyPolicy=includePrivacyPolicy)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling IllustrationApi->getIllustsRecommend: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Illustration-getIllustsRecommend-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate IllustrationApi;
+
+pub fn main() {
+    let filter = ; // IllustFilter
+    let minBookmarkIdForRecentIllust = minBookmarkIdForRecentIllust_example; // String
+    let maxBookmarkIdForRecommend = maxBookmarkIdForRecommend_example; // String
+    let offset = 56; // Integer
+    let includeRankingIllusts = true; // Boolean
+    let includePrivacyPolicy = true; // Boolean
+
+    let mut context = IllustrationApi::Context::default();
+    let result = client.getIllustsRecommend(filter, minBookmarkIdForRecentIllust, maxBookmarkIdForRecommend, offset, includeRankingIllusts, includePrivacyPolicy, &context).wait();
+    println!("{:?}", result);
+
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">filter</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRecommend_filter">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    IllustFilter
+                </span>
+
+                    <div class="inner description marked">
+The filter for different mobile platforms.
+TODO: What&#39;s the default?
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">min_bookmark_id_for_recent_illust</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRecommend_minBookmarkIdForRecentIllust">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+**TODO**
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">max_bookmark_id_for_recommend</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRecommend_maxBookmarkIdForRecommend">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+**TODO**
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">offset</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRecommend_offset">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description marked">
+The offset of the illustrations to query. Starting from 0.
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">include_ranking_illusts</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRecommend_includeRankingIllusts">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Boolean
+                </span>
+
+                    <div class="inner description marked">
+It indicates that whether the illustration ranking should also be included
+in the result.  
+Notice that even if it&#39;s set to &#x60;true&#x60;, the &#x60;next_url&#x60; in the response will still
+set it to false.  
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">include_privacy_policy</td>
+<td>
+
+
+    <div id="d2e199_getIllustsRecommend_includePrivacyPolicy">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Boolean
+                </span>
+
+                    <div class="inner description marked">
+It indicates that whether the privacy policy info should also be included
+in the result.  
+Notice that even if it&#39;s set to true, the &#x60;next_url&#x60; in the response will still
+set it to false.  
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-Illustration-getIllustsRecommend-title-200"></h3>
+                            <p id="examples-Illustration-getIllustsRecommend-description-200" class="marked"></p>
+                            <script>
+                              var responseIllustration200_description = `Successfully get the illustrations.`;
+                              var responseIllustration200_description_break = responseIllustration200_description.indexOf('\n');
+                              if (responseIllustration200_description_break == -1) {
+                                $("#examples-Illustration-getIllustsRecommend-title-200").text("Status: 200 - " + responseIllustration200_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsRecommend-title-200").text("Status: 200 - " + responseIllustration200_description.substring(0, responseIllustration200_description_break));
+                                $("#examples-Illustration-getIllustsRecommend-description-200").html(responseIllustration200_description.substring(responseIllustration200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsRecommend-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsRecommend-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsRecommend-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsRecommend-200-schema">
+                                  <div id="responses-Illustration-getIllustsRecommend-schema-200" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Successfully get the illustrations.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/RecommendIllustrations"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsRecommend-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsRecommend-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsRecommend-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Illustration-getIllustsRecommend-title-400"></h3>
+                            <p id="examples-Illustration-getIllustsRecommend-description-400" class="marked"></p>
+                            <script>
+                              var responseIllustration400_description = `Invalid request.`;
+                              var responseIllustration400_description_break = responseIllustration400_description.indexOf('\n');
+                              if (responseIllustration400_description_break == -1) {
+                                $("#examples-Illustration-getIllustsRecommend-title-400").text("Status: 400 - " + responseIllustration400_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsRecommend-title-400").text("Status: 400 - " + responseIllustration400_description.substring(0, responseIllustration400_description_break));
+                                $("#examples-Illustration-getIllustsRecommend-description-400").html(responseIllustration400_description.substring(responseIllustration400_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsRecommend-400" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsRecommend-400-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsRecommend-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsRecommend-400-schema">
+                                  <div id="responses-Illustration-getIllustsRecommend-schema-400" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid request.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/APIError"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsRecommend-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsRecommend-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsRecommend-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Illustration-getIllustsRecommend-title-500"></h3>
+                            <p id="examples-Illustration-getIllustsRecommend-description-500" class="marked"></p>
+                            <script>
+                              var responseIllustration500_description = `Internal server error.`;
+                              var responseIllustration500_description_break = responseIllustration500_description.indexOf('\n');
+                              if (responseIllustration500_description_break == -1) {
+                                $("#examples-Illustration-getIllustsRecommend-title-500").text("Status: 500 - " + responseIllustration500_description);
+                              } else {
+                                $("#examples-Illustration-getIllustsRecommend-title-500").text("Status: 500 - " + responseIllustration500_description.substring(0, responseIllustration500_description_break));
+                                $("#examples-Illustration-getIllustsRecommend-description-500").html(responseIllustration500_description.substring(responseIllustration500_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Illustration-getIllustsRecommend-500" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Illustration-getIllustsRecommend-500-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Illustration-getIllustsRecommend-500-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Illustration-getIllustsRecommend-500-schema">
+                                  <div id="responses-Illustration-getIllustsRecommend-schema-500" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Internal server error.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/APIError"
+      }
+    }
+  }
+};
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                            schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Illustration-getIllustsRecommend-500-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Illustration-getIllustsRecommend-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Illustration-getIllustsRecommend-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
