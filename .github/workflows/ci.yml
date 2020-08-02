@@ -31,10 +31,15 @@ jobs:
     - name: Install OpenAPI generator CLI
       run: |
         sudo npm install @openapitools/openapi-generator-cli -g
-
-    - name: Convert API spec to HTML
+    
+    - name: Validate API spec
       run: |
-        openapi-generator generate -g html2 -i ./api.yaml -o "/tmp/output"
+        openapi-generator validate -i ./api.yaml
+
+    - name: Generate Swagger UI
+      run: |
+        git clone --depth=1 https://github.com/swagger-api/swagger-ui /tmp/swagger-ui
+        sed -i 's/https:\/\/petstore.swagger.io\/v2\/swagger.json/https:\/\/raw.githubusercontent.com\/hanshsieh\/pixiv-api-doc\/master\/api.yaml/' /tmp/swagger-ui/dist/index.html
 
     - name: Update gh-pages branch
       if: ${{ github.event_name == 'push' }}
@@ -43,7 +48,7 @@ jobs:
         git config --local user.name "GitHub Action"
         git checkout gh-pages
         rm -rf ./*
-        mv /tmp/output/* ./
+        mv /tmp/swagger-ui/dist/* ./
         git add .
         git commit -m "Update doc" || true
 
