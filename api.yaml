@@ -34,13 +34,13 @@ paths:
           token.
         - `refresh_token`: Authenticate with a refresh token.
       operationId: getAuthToken
-      parameters: 
+      parameters:
         - name: "User-Agent"
           in: header
           schema:
             type: string
           required: true
-          examples: 
+          examples:
             android:
               value: "PixivAndroidApp/5.0.64 (Android 6.0)"
             ios:
@@ -266,7 +266,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: "#/components/schemas/IllustId" 
+            $ref: "#/components/schemas/IllustId"
       responses:
         200:
           description: Successfully get the illustrations.
@@ -322,8 +322,8 @@ components:
             The way of authentication to use.  
           example: password
           enum:
-          - password
-          - refresh_token
+            - password
+            - refresh_token
         username:
           type: string
           description: |
@@ -354,7 +354,7 @@ components:
           type: string
           description: |
             The issued access token that can be used to access other APIs.
-        expires_in: 
+        expires_in:
           type: integer
           description: |
             The number of seconds from now that the access token will expire.
@@ -370,40 +370,24 @@ components:
             The token that can be used to get a refreshed access token within expiry time without doing
             the authentication again.
         user:
-          $ref: '#/components/schemas/FullUser'
+          $ref: '#/components/schemas/User'
         device_token:
           type: string
-    FullUser:
+    User:
       type: object
       properties:
-        profile_image_urls: 
-          type: object
-          description: |
-            User's profile image URLs.  
-            If the user doesn't set a profile image, URLs to a default image will be used.
-          properties:
-            px_16x16:
-              type: string
-              format: uri
-              description: URL to the user's profile image in 16x16 pixels.
-            px_50x50:
-              type: string
-              format: uri
-              description: URL to the user's profile image in 50x50 pixels.
-            px_170x170:
-              type: string
-              format: uri
-              description: URL to the user's profile image in 170x170 pixels.
-        id: 
+        profile_image_urls:
+          $ref: '#/components/schemas/ProfileImageUrls'
+        id:
           type: string
           description:
             Internal numerical user ID.
           example: "123456789"
-        name: 
+        name:
           type: string
           description: |
             The name of the user.
-        account: 
+        account:
           type: string
           description: |
             The account name used for log in.
@@ -422,6 +406,24 @@ components:
           type: boolean
           description: |
             Whether the email of the user has been validated.
+    ProfileImageUrls:
+      type: object
+      description: |
+        User's profile image URLs.
+        If the user doesn't set a profile image, URLs to a default image will be used.
+      properties:
+        px_16x16:
+          type: string
+          format: uri
+          description: URL to the user's profile image in 16x16 pixels.
+        px_50x50:
+          type: string
+          format: uri
+          description: URL to the user's profile image in 50x50 pixels.
+        px_170x170:
+          type: string
+          format: uri
+          description: URL to the user's profile image in 170x170 pixels.
     RankingIllustrations:
       type: object
       properties:
@@ -445,12 +447,12 @@ components:
     Illustration:
       type: object
       properties:
-        id: 
+        id:
           $ref: "#/components/schemas/IllustId"
         title:
           type: string
           example: "アリス・シンセシス・サーティ/cap"
-        type: 
+        type:
           type: string
           enum:
             - illust
@@ -464,7 +466,7 @@ components:
         restrict:
           type: integer
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/Author'
         tags:
           type: array
           items:
@@ -515,7 +517,7 @@ components:
         It contains the information of one of the multiple pages of an illustration.
       properties:
         image_urls:
-          $ref: '#/components/schemas/MetaPageImageURLs'  
+          $ref: '#/components/schemas/MetaPageImageURLs'
     MetaPageImageURLs:
       type: object
       description: contains the image URLs of a meta page.
@@ -562,7 +564,7 @@ components:
     IllustImageURLs:
       type: object
       properties:
-        square_medium: 
+        square_medium:
           type: string
           example: "https://i.pximg.net/c/360x360_70/img-master/img/2020/07/30/00/26/33/83314745_p0_square1200.jpg"
         medium:
@@ -571,7 +573,7 @@ components:
         large:
           type: string
           example: "https://i.pximg.net/c/600x1200_90/img-master/img/2020/07/30/00/26/33/83314745_p0_master1200.jpg"
-    User:
+    Author:
       type: object
       properties:
         id:
@@ -583,7 +585,7 @@ components:
             medium:
               type: string
               example: "https://i.pximg.net/user-profile/img/2020/02/03/16/33/15/17853306_774cadacc6003ba8aa04ea1b754e8755_170.jpg"
-        name: 
+        name:
           type: string
         account:
           type: string
@@ -592,7 +594,7 @@ components:
           type: boolean
     IllustFilter:
       type: string
-      enum: 
+      enum:
         - for_ios
         - for_android
     RecommendIllustrations:
