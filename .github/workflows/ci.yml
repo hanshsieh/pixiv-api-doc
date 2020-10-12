@@ -34,7 +34,7 @@ jobs:
     
     - name: Validate API spec
       run: |
-        openapi-generator validate -i ./api.yaml
+        openapi-generator-cli validate -i ./api.yaml
 
     - name: Generate Swagger UI
       run: |
