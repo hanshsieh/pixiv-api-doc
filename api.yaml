@@ -61,7 +61,8 @@ paths:
           schema:
             type: string
           description: |
-            The value of `md5(<value of X-Client-Time> || <hash_secret>)`  
+            The value of `toHex(md5(<value of X-Client-Time> || <hash_secret>))`. The hex string must use lower case
+            letters.
             The hash secret is `28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c`.
       security: []
       requestBody:
