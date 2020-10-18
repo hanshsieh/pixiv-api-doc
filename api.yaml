@@ -52,7 +52,8 @@ paths:
             format: date-time
           required: true
           description: |
-            Current time in RFC3339 format. The timezone must be UTC, and must use `Z` instead of `+00:00`
+            Current time in ISO 8601 format. The timezone must be UTC, and must use `Z` instead of `+00:00`. The seconds
+            mustn't contain fractional part.
           example: "2020-08-01T23:13:00Z"
         - name: "X-Client-Hash"
           in: header
