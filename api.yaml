@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthTokensResp'
+                $ref: '#/components/schemas/AuthResultResp'
         400:
           description: Invalid request.
           content:
@@ -163,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RankingIllustrations'
+                $ref: '#/components/schemas/RankedIllustrations'
         400:
           description: Invalid request.
           content:
@@ -339,17 +339,17 @@ components:
           description: |
             This property is required when the `grant_type` is `refresh_token`, and it specified the refresh
             token.
-    AuthTokensResp:
+    AuthResultResp:
       description: |
         The schema inside `response` has the same schema as the top-level fields of this object. It's possibly 
         to provide backward compatibality.  
       allOf:
-        - $ref: '#/components/schemas/AuthTokens'
+        - $ref: '#/components/schemas/AuthResult'
         - type: object
           properties:
             response:
-              $ref: '#/components/schemas/AuthTokens'
-    AuthTokens:
+              $ref: '#/components/schemas/AuthResult'
+    AuthResult:
       type: object
       properties:
         access_token:
@@ -426,7 +426,7 @@ components:
           type: string
           format: uri
           description: URL to the user's profile image in 170x170 pixels.
-    RankingIllustrations:
+    RankedIllustrations:
       type: object
       properties:
         illusts:
