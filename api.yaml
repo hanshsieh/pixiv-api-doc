@@ -1,9 +1,9 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Pixiv API
   description: |
     This document is the unofficial API doc of [Pixiv](https://www.pixiv.net/)
-    API.   
+    API.
     Internally, Pixiv has a RESTful API, which is used by its mobile apps.
     However, the APIs aren't officially public, and there's no official document
     for the APIs. This document attempts to complement it.
@@ -12,12 +12,12 @@ info:
     url: https://opensource.org/licenses/MIT
   version: 1.0.0
 servers:
-  - url: https://app-api.pixiv.net/v1
+  - url: https://app-api.pixiv.net
     description: The API server.
 security:
   - bearer: []
 paths:
-  /auth/token:
+  "/auth/token":
     post:
       servers:
         - url: https://oauth.secure.pixiv.net
@@ -27,10 +27,10 @@ paths:
       summary: Create a new authentication token
       description: |
         Do authentication, and obtain an access token and refresh token that can be used to access other APIs.
-        There're a few grant types to do the authentication:  
-        - `password`: Authenticate with username and password. Initially, a client should authenticate 
-          with grant type `password` to obtain a access token and a refresh token. Then before the 
-          access token expires, the client should use grant type `refresh_token` to get a new access 
+        There're a few grant types to do the authentication:
+        - `password`: Authenticate with username and password. Initially, a client should authenticate
+          with grant type `password` to obtain a access token and a refresh token. Then before the
+          access token expires, the client should use grant type `refresh_token` to get a new access
           token.
         - `refresh_token`: Authenticate with a refresh token.
       operationId: getAuthToken
@@ -95,7 +95,153 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-  "/illust/ranking":
+  "/v2/user/browsing-history/illust/add":
+    post:
+      tags:
+        - user
+      summary: Add illustration to browsing history
+      description: |
+        Add illustrations to the browsing history of the current user.
+      operationId: addIllustsToBrowsingHistory
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                illust_ids[]:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IllustId'
+            encoding:
+              illust_ids[]:
+                style: form
+                explode: true
+      responses:
+        200:
+          description: |
+            Successfully added the illustrations to the browsing history.
+            The response is an empty JSON object.
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v2/illust/bookmark/add":
+    post:
+      tags:
+        - user
+      summary: Add illustration to the users's bookmark
+      description: |
+        Add an illustration to the users's bookmark.
+      operationId: addIllustToBookmark
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                illust_id:
+                  $ref: '#/components/schemas/IllustId'
+                restrict:
+                  type: string
+                  enum:
+                    - public
+              required:
+                - illust_id
+                - restrict
+      responses:
+        200:
+          description: |
+            Successfully added the illustration to the bookmark.
+            The response is an empty JSON object.
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v2/illust/related":
+    get:
+      tags:
+        - illustration
+      summary: Gets the related illustrations
+      description: |
+        Gets the illustrations related to a given illustration.
+      operationId: getRelatedIllusts
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IllustFilter'
+          description: |
+            The filter for different mobile platforms.
+        - name: illust_id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/IllustId'
+          description: |
+            Illustration ID.
+        - name: seed_illust_ids[0]
+          in: query
+          schema:
+            $ref: '#/components/schemas/IllustId'
+          required: false
+          description: |
+            TODO What does it mean?
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            The offset of the illustrations to query. Starting from 0.
+      responses:
+        200:
+          description: Successfully get the illustrations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RelatedIllustrations'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v1/illust/ranking":
     get:
       tags:
         - illustration
@@ -176,7 +322,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
-  "/illust/recommended":
+  "/v1/illust/recommended":
     get:
       tags:
         - illustration
@@ -241,7 +387,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecommendIllustrations'
+                $ref: '#/components/schemas/RecommendedIllusts'
         400:
           description: Invalid request.
           content:
@@ -254,7 +400,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
-  "/illust/detail":
+  "/v1/illust/detail":
     get:
       tags:
         - illustration
@@ -288,7 +434,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIError'
-  "/search/illust":
+  "/v1/search/illust":
     get:
       tags:
         - illustration
@@ -365,7 +511,303 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RecommendIllustrations'
+                $ref: '#/components/schemas/RecommendedIllusts'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v1/user/illusts":
+    get:
+      tags:
+        - illustration
+      summary: Gets the illustrations of a user
+      description: |
+        Gets the illustrations of a user.
+      operationId: getUserIllusts
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IllustFilter'
+          description: |
+            The filter for different mobile platforms.
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserId'
+          description: |
+            Illustration ID.
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/IllustType'
+          required: true
+          description: |
+            Type of the illustration.
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            The offset of the illustrations to query. Starting from 0.
+      responses:
+        200:
+          description: Successfully get the illustrations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserIllustrations'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v2/illust/comments":
+    get:
+      tags:
+        - comment
+      summary: Gets the comments of an illustration
+      description: |
+        Gets the comments of an illustration.
+        The returned comments are sorted by the creation time from the newest
+        to the oldest.
+      operationId: getIllustComments
+      parameters:
+        - name: illust_id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/IllustId'
+          description: |
+            Illustration ID.
+            It can be the ID of an illustration, manga, or novel.
+        - name: last_comment_id
+          in: query
+          schema:
+            $ref: '#/components/schemas/CommentId'
+          description: |
+            The last comment ID to start the query. Normally, it should be the
+            ID of the last comment of the last query result.
+      responses:
+        200:
+          description: Successfully get the comments.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IllustComments'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v1/illust/comment/replies":
+    get:
+      tags:
+        - comment
+      summary: Gets the replies of a comment
+      description: |
+        Gets the replied comments of a comment.
+        The returned replies are sorted by the creation time from the newest
+        to the oldest.
+      operationId: getCommentReplies
+      parameters:
+        - name: comment_id
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/CommentId'
+          description: |
+            Illustration ID.
+        - name: last_comment_id
+          in: query
+          schema:
+            $ref: '#/components/schemas/CommentId'
+          description: |
+            The last comment ID to start the query. Normally, it should be the
+            ID of the last comment of the last query result.
+      responses:
+        200:
+          description: Successfully get the comments.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IllustComments'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v1/manga/recommended":
+    get:
+      tags:
+        - manga
+      summary: Returns the recommended mangas based on the logged in user's preference
+      description: |
+        It returns the recommended mangas based on the logged in user's preference.
+      operationId: getRecommendedMangas
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IllustFilter'
+          description: |
+            The filter for different mobile platforms.
+        - name: max_bookmark_id
+          in: query
+          required: false
+          schema:
+            type: string
+            example: 6637022485
+          description: |
+            The ID of the bookmark to query the next page. The value can be
+            obtained from the `next_url` of the last response.
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            The offset of the illustrations to query. Starting from 0.
+        - name: include_ranking_illusts
+          in: query
+          schema:
+            type: boolean
+          description: |
+            It indicates that whether the illustration ranking should also be included
+            in the result.
+            This is usually set to true for the first page, and false for the following
+            pages, so that both the first page of ranking and recommended illustrations
+            can be obtained in a single request.
+            Notice that even if it's set to `true`, the `next_url` in the response will still
+            set it to false.
+        - name: include_privacy_policy
+          in: query
+          schema:
+            type: boolean
+          description: |
+            It indicates that whether the privacy policy info should also be included
+            in the result.
+            Notice that even if it's set to true, the `next_url` in the response will still
+            set it to false.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendedMangas'
+        400:
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        500:
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+  "/v1/novel/recommended":
+    get:
+      tags:
+        - novel
+      summary: Returns the recommended novels based on the logged in user's preference
+      description: |
+        It returns the recommended novels based on the logged in user's preference.
+      operationId: getRecommendedNovels
+      parameters:
+        - name: max_bookmark_id
+          in: query
+          required: false
+          schema:
+            type: string
+            example: 6637022485
+          description: |
+            The ID of the bookmark to query the next page. The value can be
+            obtained from the `next_url` of the last response.
+        - name: include_ranking_novels
+          in: query
+          schema:
+            type: boolean
+          description: |
+            It indicates that whether the novel ranking should also be included
+            in the result.
+            This is usually set to true for the first page, and false for the following
+            pages, so that both the first page of ranking and recommended novels
+            can be obtained in a single request.
+            Notice that even if it's set to `true`, the `next_url` in the response will still
+            set it to false.
+        - name: include_privacy_policy
+          in: query
+          schema:
+            type: boolean
+          description: |
+            It indicates that whether the privacy policy info should also be included
+            in the result.
+            Notice that even if it's set to true, the `next_url` in the response will still
+            set it to false.
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            The offset of the illustrations to query. Starting from 0.
+        - name: already_recommended
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/IllustId'
+          style: form
+          explode: false
+          description: |
+            List of manga IDs that should be excluded from the result.
+            This is usually set to all the IDs of the previous pages.
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendedNovels'
         400:
           description: Invalid request.
           content:
@@ -473,10 +915,7 @@ components:
         profile_image_urls:
           $ref: '#/components/schemas/ProfileImageUrls'
         id:
-          type: string
-          description:
-            Internal numerical user ID.
-          example: "123456789"
+          $ref: '#/components/schemas/UserId'
         name:
           type: string
           description: |
@@ -518,6 +957,34 @@ components:
           type: string
           format: uri
           description: URL to the user's profile image in 170x170 pixels.
+    UserIllustrations:
+      type: object
+      properties:
+        illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v1/user/illusts?filter=for_android&user_id=7140895&type=illust&offset=30"
+      required:
+        - illusts
+    RelatedIllustrations:
+      type: object
+      properties:
+        illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v2/illust/related?filter=for_android&illust_id=83580495&seed_illust_ids%5B0%5D=83580495&offset=60"
+      required:
+        - illusts
     RankingIllustrations:
       type: object
       properties:
@@ -532,12 +999,29 @@ components:
           example: "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
       required:
         - illusts
+    UserId:
+      type: string
+      description:
+        Internal numerical user ID.
+      example: "123456789"
     IllustId:
       type: integer
       format: int64
       description: |
-        Illustration ID.  
+        Illustration ID.
       example: 83314745
+    CommentId:
+      type: integer
+      format: int64
+      description: |
+        Comment ID.
+      example: 113765733
+    IllustType:
+      type: string
+      enum:
+        - illust
+        - ugoira
+        - manga
     Illustration:
       type: object
       properties:
@@ -547,11 +1031,7 @@ components:
           type: string
           example: "アリス・シンセシス・サーティ/cap"
         type:
-          type: string
-          enum:
-            - illust
-            - ugoira
-            - manga
+          $ref: '#/components/schemas/IllustType'
         image_urls:
           $ref: '#/components/schemas/IllustImageURLs'
         caption:
@@ -597,14 +1077,19 @@ components:
             $ref: '#/components/schemas/MetaPage'
         total_view:
           type: integer
+          example: 14224
         total_bookmarks:
           type: integer
+          example: 287
         is_bookmarked:
           type: boolean
+          example: false
         visible:
           type: boolean
+          example: true
         is_muted:
           type: boolean
+          example: false
     MetaPage:
       type: object
       description: |
@@ -631,7 +1116,7 @@ components:
     MetaSinglePage:
       type: object
       description: |
-        It contains the image URLs when the illustration contain only a single image.  
+        It contains the image URLs when the illustration contain only a single image.
       properties:
         original_image_url:
           type: string
@@ -655,6 +1140,18 @@ components:
           type: string
       required:
         - name
+    NovelTag:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Fate/GrandOrder"
+        translated_name:
+          type: string
+        added_by_uploaded_user:
+          type: boolean
+      required:
+        - name
     IllustImageURLs:
       type: object
       properties:
@@ -667,6 +1164,12 @@ components:
         large:
           type: string
           example: "https://i.pximg.net/c/600x1200_90/img-master/img/2020/07/30/00/26/33/83314745_p0_master1200.jpg"
+    AuthorImageUrls:
+      type: object
+      properties:
+        medium:
+          type: string
+          example: "https://i.pximg.net/user-profile/img/2020/02/03/16/33/15/17853306_774cadacc6003ba8aa04ea1b754e8755_170.jpg"
     Author:
       type: object
       properties:
@@ -674,11 +1177,7 @@ components:
           type: integer
           format: int64
         profile_image_urls:
-          type: object
-          properties:
-            medium:
-              type: string
-              example: "https://i.pximg.net/user-profile/img/2020/02/03/16/33/15/17853306_774cadacc6003ba8aa04ea1b754e8755_170.jpg"
+          $ref: '#/components/schemas/AuthorImageUrls'
         name:
           type: string
         account:
@@ -691,7 +1190,7 @@ components:
       enum:
         - for_ios
         - for_android
-    RecommendIllustrations:
+    RecommendedIllusts:
       type: object
       properties:
         illusts:
@@ -713,15 +1212,170 @@ components:
           example: "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
       required:
         - illusts
+    IllustComments:
+      type: object
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/IllustComment'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v2/illust/comments?illust_id=66119493&last_comment_id=73593607"
+      required:
+        - comments
+    RecommendedMangas:
+      type: object
+      properties:
+        illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        ranking_illusts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Illustration'
+        privacy_policy:
+          $ref: '#/components/schemas/PrivacyPolicy'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v1/manga/recommended?filter=for_android&include_ranking_illusts=false&include_privacy_policy=false&max_bookmark_id=2898490773&offset=60"
+      required:
+        - illusts
+    RecommendedNovels:
+      type: object
+      properties:
+        novels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Novel'
+        ranking_novels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Novel'
+        privacy_policy:
+          $ref: '#/components/schemas/PrivacyPolicy'
+        next_url:
+          type: string
+          description: |
+            The next URL that can be used for querying the next page, if any.
+          example: "https://app-api.pixiv.net/v1/novel/recommended?include_ranking_novels=false&include_privacy_policy=false&offset=15&already_recommended=14246258%2C14244406%2C14243790%2C14247365%2C14243138%2C14243307%2C14243958%2C14252191%2C14244697%2C14249809%2C14244181%2C14245453%2C12489004%2C14249410%2C14245509"
+      required:
+        - illusts
+    Novel:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/IllustId"
+        title:
+          type: string
+          example: "アリス・シンセシス・サーティ/cap"
+        caption:
+          type: string
+          example: "何気に商人だけのサムネって初めてでは？"
+        restrict:
+          type: integer
+          example: 0
+        x_restrict:
+          type: integer
+          example: 0
+        is_original:
+          type: boolean
+        image_urls:
+          $ref: '#/components/schemas/IllustImageURLs'
+        create_date:
+          type: string
+          format: date-time
+          example: "2020-12-11T16:23:04+09:00"
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/NovelTag'
+        page_count:
+          type: integer
+          example: 6
+        text_length:
+          type: integer
+          example: 22683
+        user:
+          $ref: '#/components/schemas/Author'
+        series:
+          $ref: '#/components/schemas/Series'
+        is_bookmarked:
+          type: boolean
+        total_bookmarks:
+          type: integer
+          example: 2894
+        total_view:
+          type: integer
+          example: 40319
+        visible:
+          type: boolean
+        total_comments:
+          type: integer
+          example: 115
+        is_muted:
+          type: boolean
+        is_mypixiv_only:
+          type: boolean
+          example: false
+        is_x_restricted:
+          type: boolean
+    IllustComment:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/CommentId'
+        comment:
+          type: string
+          description: |
+            Content of the comment.
+            It can contain special strings like `(happy3)` and `(heart)`
+            to indicate a built-in icon.
+          example: 好评！！！！ (happy3)
+        date:
+          type: string
+          format: date-time
+          example: "2015-08-09T07:27:56+09:00"
+        has_replies:
+          type: boolean
+          description: |
+            Whether the comment has replies.
+        user:
+          type: object
+          description: |
+            The user who created the comment.
+          properties:
+            profile_image_urls:
+              $ref: '#/components/schemas/AuthorImageUrls'
+            id:
+              $ref: '#/components/schemas/UserId'
+            name:
+              type: string
+              description: |
+                The name of the user.
+              example: Kureiji :3
+            account:
+              type: string
+              description: |
+                The account name used for log in.
+              example: slim_shadythe11
     PrivacyPolicy:
       type: object
       properties:
         version:
           type: string
+          example: "2-en"
         message:
           type: string
+          example: pixiv has updated the Privacy Policy as from March 30, 2020.
         url:
           type: string
+          example: https://www.pixiv.net/terms/?page=new_privacy&appname=pixiv_ios
     IllustrationDetail:
       type: object
       properties:
