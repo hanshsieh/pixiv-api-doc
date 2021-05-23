@@ -309,7 +309,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RankingIllustrations'
+                $ref: '#/components/schemas/RankedIllustrations'
         400:
           description: Invalid request.
           content:
@@ -985,7 +985,7 @@ components:
           example: "https://app-api.pixiv.net/v2/illust/related?filter=for_android&illust_id=83580495&seed_illust_ids%5B0%5D=83580495&offset=60"
       required:
         - illusts
-    RankingIllustrations:
+    RankedIllustrations:
       type: object
       properties:
         illusts:
