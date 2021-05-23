@@ -160,6 +160,7 @@ paths:
                   type: string
                   enum:
                     - public
+                    - private
               required:
                 - illust_id
                 - restrict
@@ -613,7 +614,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IllustComments'
+                $ref: '#/components/schemas/Comments'
         400:
           description: Invalid request.
           content:
@@ -657,7 +658,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IllustComments'
+                $ref: '#/components/schemas/Comments'
         400:
           description: Invalid request.
           content:
@@ -1212,13 +1213,13 @@ components:
           example: "https://app-api.pixiv.net/v1/illust/ranking?filter=for_android&mode=day&offset=30"
       required:
         - illusts
-    IllustComments:
+    Comments:
       type: object
       properties:
         comments:
           type: array
           items:
-            $ref: '#/components/schemas/IllustComment'
+            $ref: '#/components/schemas/Comment'
         next_url:
           type: string
           description: |
@@ -1325,7 +1326,7 @@ components:
           example: false
         is_x_restricted:
           type: boolean
-    IllustComment:
+    Comment:
       type: object
       properties:
         id:
@@ -1346,24 +1347,17 @@ components:
           description: |
             Whether the comment has replies.
         user:
-          type: object
-          description: |
-            The user who created the comment.
-          properties:
-            profile_image_urls:
-              $ref: '#/components/schemas/AuthorImageUrls'
-            id:
-              $ref: '#/components/schemas/UserId'
-            name:
-              type: string
-              description: |
-                The name of the user.
-              example: Kureiji :3
-            account:
-              type: string
-              description: |
-                The account name used for log in.
-              example: slim_shadythe11
+          allOf:
+            - $ref: '#/components/schemas/Author'
+            - description: |
+                Author of the comment.
+                It won't have the `is_followed` field.
+              example:
+                id: 14482166
+                name: 恵
+                account: mylife1006
+                profile_image_urls:
+                  medium: 'https://s.pximg.net/common/images/no_profile.png'
     PrivacyPolicy:
       type: object
       properties:
